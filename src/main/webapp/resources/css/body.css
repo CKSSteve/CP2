@@ -1,0 +1,68 @@
+body {
+	margin:0 0 0 0px;
+	padding:0px;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:12px;
+}
+form{
+	margin:0px;
+	
+}
+.copyright {
+	margin:0px 10px 0px 0px;
+	padding:0px;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:9pt;
+/* 	line-height:30px; */
+	color:#FAEBD7;
+	clear: both;
+}
+#sider {
+	background:url(../images/left_bg.gif) repeat-y;
+	SCROLLBAR-FACE-COLOR: #F3F1F4;
+	SCROLLBAR-HIGHLIGHT-COLOR:  #F3F1F4;
+	SCROLLBAR-SHADOW-COLOR:  #F3F1F4;
+	SCROLLBAR-3DLIGHT-COLOR: #B6B4B7;
+	SCROLLBAR-ARROW-COLOR: #B6B4B7;
+	SCROLLBAR-DARKSHADOW-COLOR: #B6B4B7;
+	SCROLLBAR-BASE-COLOR: #F3F1F4;
+	margin:0px 0px 0px 0px;
+	padding:0px;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:12px;
+}
+#scroller {
+	SCROLLBAR-FACE-COLOR: #F3F1F4;
+	SCROLLBAR-HIGHLIGHT-COLOR:  #F3F1F4;
+	SCROLLBAR-SHADOW-COLOR:  #F3F1F4;
+	SCROLLBAR-3DLIGHT-COLOR: #B6B4B7;
+	SCROLLBAR-ARROW-COLOR: #B6B4B7;
+	SCROLLBAR-DARKSHADOW-COLOR: #B6B4B7;
+	SCROLLBAR-BASE-COLOR: #F3F1F4;
+	margin:0px 0px 0px 0px;
+	padding:0px;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:12px;
+}
+#menu{
+/* 	background:url(../images/menu_back.png) repeat-y; */
+	background-color:#50CCB1;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:12px;
+	float:left;
+	padding:0px;
+	width:10%;
+	height:545px;
+}
+
+#main{
+/* 	float:left; */
+	width:80%;
+	height:76%;
+ 	margin-left:auto; 
+ 	margin-right:auto;
+/*  	overflow: auto; */
+
+}
+
+

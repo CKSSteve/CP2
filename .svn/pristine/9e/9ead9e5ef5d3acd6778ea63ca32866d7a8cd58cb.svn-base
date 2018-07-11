@@ -1,0 +1,343 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%> 
+
+<html>
+<head>
+<c:if test="${errMsg!=null && !empty errMsg}">
+  <script type="text/javascript" language="javascript">
+  var errorMsg = "";
+  <c:forEach items="${errMsg}" var="errMsgs" step="1">
+  errorMsg += '<c:out value="${errMsgs}" />'+"\r\n";
+  </c:forEach>
+  alert(errorMsg);
+  </script>
+  </c:if>
+</head>
+
+<body>
+<div id="setting">
+
+<form:form name="UserSetting" id="UserSetting" method="POST">
+<h1><span class="title-l">個人資料維護</span></h1>
+  <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" alt=""></td>
+        <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+          <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" alt=""></td>
+    </tr>
+    <tr>
+      <td width="8" style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-y">&nbsp;</td>
+      <td>
+          <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table_none">
+            <tr>
+              <td height="30"><img src="<c:url value="/resources/images/page.gif"/>" border="0" align="middle" alt="">標有<span class="red">＊</span>的欄位為必要資料，請正確填寫。</td>
+            </tr>
+          </table>
+          <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table05">
+            <tr>
+              <th width="25%">帳號</th>
+              <td width="75%"><div align="left"><c:out value="${modifyUser.userId}" /> </div></td>
+            </tr>
+            <tr>
+              <th>＊&nbsp;使用者名稱</th>
+              <td>
+                <div align="left">
+                  <c:if test="${!empty modifyUser.userName}">
+                    <input type="text" name="userName" size="30" maxlength="30" class="textfield" value="${modifyUser.userName}"/>
+                  </c:if>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>所屬分行代碼 / 名稱 </th>
+              <td><div align="left"><c:out value="${modifyUser.branchId}" />&nbsp;&nbsp;/&nbsp;&nbsp;<c:out value="${modifyUser.branch.chineseName}" /></div></td>
+            </tr>
+            <tr>
+              <th>所屬角色</th>
+              <td>
+                <div align="left">
+                  <c:if test="${!empty modifyUser.roleId}">
+                    <c:out value="${modifyUser.role.roleName}" />
+                  </c:if>
+                  <c:if test="${empty modifyUser.roleId}">
+                  N/A
+                  </c:if>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>新密碼</th>
+              <td>
+                <div align="left">
+                  <input type="password" name="newPwd" size="40" maxlength="50" class="textfield" />&nbsp;&nbsp;空白則為原有密碼
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>新密碼確認</th>
+              <td>
+                <div align="left">
+                  <input type="password" name="chkPwd" size="40" maxlength="50" class="textfield" />&nbsp;&nbsp;空白則為原有密碼
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>聯絡電話</th>
+              <td>
+                <div align="left">
+                  <input type="text" name="telNo" size="30" maxlength="20" class="textfield" value="${modifyUser.telNo}"/>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>電子郵件</th>
+              <td>
+                <div align="left">
+                  <input type="text" name="email" size="60" maxlength="100" class="textfield" value="${modifyUser.email}"/>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>上次修改密碼時間</th>
+              <td>
+                <div align="left"><fmt:formatDate value="${modifyUser.changePasswordTime}" pattern="yyyy/MM/dd" />
+                  <br /><font color="#B22222">(密碼尚餘 <sec:authentication property="principal.changePwdtime" /> 天有效)</font></div>
+              </td>
+            </tr>
+			<tr>
+				<th>承作業務類別</th>
+				<td>
+					<div align="left">
+						<c:if test="${modifyUser.businessTypeC == 'Y'}">
+						承作本票業務 <br />
+						</c:if>
+						<c:if test="${modifyUser.businessTypeG == 'Y'}">
+						承作本票業務<br />
+						</c:if>
+						<c:if test="${modifyUser.businessTypeQ == 'Y'}">
+						承作標單業務 <br />
+						</c:if>
+					</div>
+				</td>
+			</tr>
+            <tr>
+              <th>狀態</th>
+              <td>
+                <div align="left">
+                <c:if test="${modifyUser.status==0}">
+                  停用<br /><font color="#B22222">請洽管理人員啟用方才可以操作</font>
+                </c:if>
+                <c:if test="${modifyUser.status==1}">
+                啟用
+                </c:if>
+                <c:if test="${modifyUser.status > 1}">
+                N/A
+                </c:if>
+                </div>
+              </td>
+            </tr>
+          </table>
+              </td>
+              <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" alt=""></td>
+        <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+          <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" alt=""></td>
+    </tr>
+  </table>
+
+  <c:if test="${!empty modifyUser}">
+    <p class="pbtn">
+      <input type="reset" name="reset" value="重新輸入" class="button-brown"/>
+      &nbsp;
+      <input type="button" name="preview" value="預覽" class="button-brown" onclick="previewUser()"/>
+    </p> 																				
+  </c:if>
+</form:form>
+</div>
+<div id="preview">
+<h1><span class="title-l">個人資料維護-預覽</span></h1>
+<form:form name="UserSettingPrebiew" id="UserSettingPrebiew" method="POST">
+  <input type="hidden" name="userId" value="${modifyUser.userId}"/>
+  <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" alt=""></td>
+        <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+          <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" alt=""></td>
+    </tr>
+    <tr>
+      <td width="8" style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-y">&nbsp;</td>
+      <td>
+          <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table05">
+            <tr>
+              <th width="25%">帳號</th>
+              <td width="75%"><div align="left"><c:out value="${modifyUser.userId}" /></div></td>
+            </tr>
+            <tr>
+              <th>＊&nbsp;使用者名稱</th>
+              <td>
+                <div align="left" id="previewUserName">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>所屬分行代碼 / 名稱 </th>
+              <td><div align="left"><c:out value="${modifyUser.branchId}" />&nbsp;&nbsp;/&nbsp;&nbsp;<c:out value="${modifyUser.branch.chineseName}" /></div></td>
+            </tr>
+            <tr>
+              <th>所屬角色</th>
+              <td>
+                <div align="left" id="roleName">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>新密碼</th>
+              <td>
+                <div align="left">****************         
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>聯絡電話</th>
+              <td>
+                <div align="left" id="previewTelNo">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>電子郵件</th>
+              <td>
+                <div align="left" id="previewEmail">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>上次修改密碼時間</th>
+              <td>
+                <div align="left"><fmt:formatDate value="${modifyUser.changePasswordTime}" pattern="yyyy/MM/dd" />
+                  <br /><font color="#B22222">(密碼尚餘 <sec:authentication property="principal.changePwdtime" /> 天有效)</font></div>
+              </td>
+            </tr>
+			<tr>
+				<th>承作業務類別</th>
+				<td>
+					<div align="left">
+						<c:if test="${modifyUser.businessTypeC == 'Y'}">
+						承作本票業務 <br />
+						</c:if>
+						<c:if test="${modifyUser.businessTypeG == 'Y'}">
+						承作本票業務<br />
+						</c:if>
+						<c:if test="${modifyUser.businessTypeQ == 'Y'}">
+						承作標單業務 <br />
+						</c:if>
+					</div>
+				</td>
+			</tr>
+            <tr>
+              <th>狀態</th>
+              <td>
+                <div align="left">
+                <c:if test="${modifyUser.status==0}">
+                  停用<br /><font color="#B22222">請洽管理人員啟用方才可以操作</font>
+                </c:if>
+                <c:if test="${modifyUser.status==1}">
+                啟用
+                </c:if>
+                <c:if test="${modifyUser.status > 1}">
+                N/A
+                </c:if>
+                </div>
+              </td>
+            </tr>
+          </table>
+              </td>
+              <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" alt=""></td>
+        <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+          <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" alt=""></td>
+    </tr>
+  </table>
+
+  <c:if test="${!empty modifyUser}">
+    <p class="pbtn">
+      <input type="button" name="previous" value="上一頁" class="button-brown" onclick="previousUser()"/>
+      &nbsp;
+      <input type="button" name="confirm" value="確認" class="button-brown" onclick="confirmUser()"/>
+    </p> 																				
+  </c:if>
+</form:form>
+</div>
+<script type="text/javascript" language="javascript">
+$(function() {
+	$("#preview").hide();
+
+})
+
+function previewUser() {
+  var errorMsg = "";
+  userNameValue=$('input[name="userName"]').val();
+  newPwdValue=$('input[name="newPwd"]').val();
+  chkPwdValue=$('input[name="chkPwd"]').val();
+  telNoValue=$('input[name="telNo"]').val();
+  emailValue=$('input[name="email"]').val();
+  if(userNameValue.length<1) {
+    errorMsg += "使用者名稱，不可以為空白\r\n";
+  }
+
+  if(newPwdValue.length>=1 && chkPwdValue.length>=1) {
+	  if(newPwdValue!=chkPwdValue) {
+      errorMsg += "新密碼與新密碼確認，內容不一致\r\n";
+    }
+  } else if(newPwdValue.length>=1 && chkPwdValue.length<1) {
+    errorMsg += "新密碼確認，不可以為空白\r\n";
+  } else if(chkPwdValue.length<1 && newPwdValue.length>=1) {
+    errorMsg += "新密碼，不可以為空白\r\n";
+  }
+
+  str= newPwdValue.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+
+  if(str.length<8 && str.length >0){
+    errorMsg+="[使用者密碼]長度不可小於8碼";
+    $('input[name="newPwd"]').val("");
+    $('input[name="chkPwd"]').val("");
+  }
+
+  if(errorMsg.length>1) {
+    alert(errorMsg);
+    return false;
+  } else {
+	  $("#previewUserName").html(userNameValue);
+	  $("#previewTelNo").html(telNoValue);
+	  $("#previewEmail").html(emailValue);
+	  $("#setting").hide();
+	  $("#preview").show();
+  }
+
+}
+
+function confirmUser(){
+
+	$("#UserSetting").attr("action", '<c:url value="/personalUserSetting/personalUserSave"/>');
+	$("#UserSetting").submit();
+}
+
+function previousUser(){
+	
+	  $("#preview").hide();
+	  $("#setting").show();
+	  
+}
+
+</script>
+
+</body>
+</html>
+

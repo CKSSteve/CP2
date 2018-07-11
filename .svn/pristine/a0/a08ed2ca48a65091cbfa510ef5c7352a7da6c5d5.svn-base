@@ -1,0 +1,230 @@
+<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="springform"
+	uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="sec"
+	uri="http://www.springframework.org/security/tags"%>
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>UXB2B-無實體票券系統<sitemesh:write property='title' /></title>
+<link href="<%=request.getContextPath()%>/resources/css/body.css" type="text/css" rel="stylesheet" />
+<link href="<%=request.getContextPath()%>/resources/css/content.css" type="text/css" rel="stylesheet" />
+<link href="<%=request.getContextPath()%>/resources/css/table.css" type="text/css" rel="stylesheet" />
+<link href="<%=request.getContextPath()%>/resources/css/left-menu.css" type="text/css" rel="stylesheet"/>
+<link href="<%=request.getContextPath()%>/resources/css/theme.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="<%=request.getContextPath()%>/resources/javascript/jquery-3.2.1.slim.js"></script>
+
+<link href="<%=request.getContextPath()%>/resources/jQueryAssets/jquery.ui.core.min.css" rel="stylesheet" type="text/css" />
+<link href="<%=request.getContextPath()%>/resources/jQueryAssets/jquery.ui.theme.min.css" rel="stylesheet" type="text/css" />
+<link href="<%=request.getContextPath()%>/resources/jQueryAssets/jquery.ui.datepicker.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="<%=request.getContextPath()%>/resources/jQueryAssets/jquery-1.11.1.min.js" ></script>	
+<script src="<%=request.getContextPath()%>/resources/jQueryAssets/jquery.ui-1.10.4.datepicker.min.js" type="text/javascript"></script>
+<script src="<%=request.getContextPath()%>/resources/jQueryAssets/jquery.ui.datepicker-zh-TW.js" type="text/javascript" ></script>
+<style>
+  dd { margin: 2px; }
+ </style>
+<script language="JavaScript" type="text/JavaScript">
+$(function() {
+	if('<c:out value="${messageCount}" />'>0){	
+		alert("您有"+'<c:out value="${messageCount}" />'+"條訊息");	
+	}
+	
+	
+	menuJs();
+	
+});
+
+function menuJs(){
+    $("dd").hide();
+    
+    //按下dt元素連結
+    $("dt a").click(function() {
+    	$("dd").slideUp(); //子分頁
+    		 
+       	//下一個主選單以下的內容要slide down
+       	$(this).parent().next().slideDown();
+        return false;
+    })
+	
+}
+
+function show_date(){
+	  var time=new Date(); //宣告日期物件，儲存目前系統時間
+	  t_year=time.getFullYear(); //取得今年年分
+	  if(t_year > 2011){
+	    document.write(" - " + t_year);
+	  }
+	}
+</script>
+<sitemesh:write property='head' />
+<sec:csrfMetaTags />
+</head>
+
+<body>
+	<div id="top">
+		<!-- 		<form name="logoutForm" action="login.do" method="POST"> -->
+		<!-- 			<input type="hidden" name="method" value="logout" /> -->
+		<!-- 		  	<input type="hidden" name="type" value="0" /> -->
+		<!-- 		</form> -->
+		<springform:form method="post" id="logout">
+			<input type="hidden" name="${_csrf.parameterName}"
+				value="${_csrf.token}" />
+		</springform:form>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+<!-- 				<td -->
+<%-- 					style="background:url(<c:url value="/resources/images/header_bg.gif"/>) repeat-x"><img --%>
+<%-- 					src="<c:url value="/resources/images/header_logo.gif"/>" --%>
+<!-- 					width="165" height="62" alt="" /></td> -->
+<!-- 				<td align="right" -->
+<%-- 					style="background:url(<c:url value="/resources/images/header_bg.gif"/>) repeat-x"><img --%>
+<%-- 					src="<c:url value="/resources/images/header_title.jpg"/>" --%>
+<!-- 					width="466" height="62" alt="" /></td> -->
+					
+				<td align="right"><img
+					src="<c:url value="/resources/images/header_logo.jpg"/>"
+					width="100%" alt="" /></td>
+			</tr>
+		</table>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0"
+			style="background:url(<c:url value="/resources/images/header_item_bg.jpg"/>) repeat-x"
+			id="table_header">
+			<tr>
+				<td width="10%" height="50px" style="background-color:#50CCB1"><img
+					src="<c:url value="/resources/images/header_item_01.jpg"/>"
+					width="100%" height="50px" /></td>
+				<td width="49"><img
+					src="<c:url value="/resources/images/header_item_02.jpg"/>"
+					 /></td>
+				<td style="padding-top: 3px;">[&nbsp;&nbsp;<a class="logout"
+					href="javascript:formSubmit()">登出系統</a>&nbsp;&nbsp;] [&nbsp;&nbsp;<a
+					href="<%=request.getContextPath()%>/todoMain">待辦事項</a>&nbsp;&nbsp;]
+					[&nbsp;&nbsp;<a href="#"
+					onClick="window.location.href='<c:out value="${pageContext.request.contextPath}" />/MessageInbox'">訊息匣</a>&nbsp;&nbsp;]
+					[&nbsp;&nbsp;密碼有效剩餘天數:&nbsp;<font color="red"><sec:authentication
+							property="principal.changePwdtime" /></font>&nbsp;天]
+				</td>
+				<td style="padding-top: 3px;">登入者： <sec:authentication
+						property="principal.viewUserName" />
+				</td>
+<!-- 				<td valign="top"><div align="right"> -->
+<%-- 						<img src="<c:url value="/resources/images/header_item_03.jpg"/>" --%>
+<!-- 							width="124" height="32" alt="" /> -->
+<!-- 					</div></td> -->
+			</tr>
+		</table>
+	</div>
+	<div  id="menu" class="left-menu-002">
+		<sec:authentication var="roleId" property="principal.roleId" />
+		<c:if test="${!empty functionA[roleId]}">
+			<table width="100%"  border="0" cellpadding="0" 
+				cellspacing="0"
+				>
+				<tbody>
+				
+					<tr>
+						<td>
+							<!--標單作業 -->
+						<dl>				
+							<dt class="menu_title"><a href="#" >標單作業</a></dt>
+								<dd>
+									<ul>
+										<c:forEach items="${functionA[roleId]}" var="functionA">
+											<li><a href="<c:url value="${functionA.uri}"/>">
+													<c:out value="${functionA.functionName}" />
+											</a></li>
+										</c:forEach>
+									</ul>
+							</dd>
+						</dl>	
+						</td>
+					</tr>
+
+				</tbody>
+			</table>
+		</c:if>
+		<!--本票作業 -->
+		<c:if test="${!empty functionB[roleId]}">
+			<table width="100%"  border="0" cellpadding="0"
+				cellspacing="0"
+				>
+				<tbody>
+					<tr>
+						<td>
+						<dl>				
+							<dt class="menu_title"><a href="#">本票作業</a></dt>
+								<dd>
+									<ul>
+										<c:forEach items="${functionB[roleId]}" var="functionB">
+											<li><a href="<c:url value="${functionB.uri}"/>">
+													<c:out value="${functionB.functionName}" />
+											</a></li>
+										</c:forEach>
+									</ul>
+							</dd>
+						</dl>	
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</c:if>
+		<!--管理作業 -->
+		<c:if test="${!empty functionD[roleId]}">
+			<table width="100%" border="0" cellpadding="0"
+				cellspacing="0"
+				>
+				<tbody>
+	
+					<tr>
+						<td>
+						<dl>				
+							<dt class="menu_title"><a href="#">管理作業</a></dt>
+								<dd>
+									<ul>
+										<c:forEach items="${functionD[roleId]}" var="functionD">
+											<li><a href="<c:url value="${functionD.uri}"/>">
+													<c:out value="${functionD.functionName}" />
+											</a></li>
+										</c:forEach>
+									</ul>
+							</dd>
+						</dl>	
+						</td>
+					</tr>
+				
+				</tbody>
+			</table>
+		</c:if>
+	</div>
+	<div id="main">
+		<sitemesh:write property='body' />
+	</div>
+	<div id="footer">
+		<jsp:useBean id="attr" scope="application"
+			class="java.util.jar.Attributes" />
+		<table width="100%" border="0" cellpadding="0" cellspacing="0"
+			>
+			<tr>
+				<td  width="10%" height="45px" bgcolor="#3F95EA">&nbsp;</td>
+				<td align="right" style="background:url(<c:url value="/resources/images/bottom_footer.jpg"/> ) no-repeat ;background-size:100%" width="100%">			
+				   <table>
+         				<tr>
+         				<td align="left" class="copyright" style="padding:0px 0px 0px 0px" >&copy; 2006<script type="text/javascript" language="javascript">show_date();</script> UXB2B Inc. All Rights Reserved.
+            			</td>
+         				</tr>
+         </table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<script type="text/javascript">
+		function formSubmit() {
+			$('#logout').attr('action', '<c:url value="/logout"/>');
+			$('#logout').submit();
+		}
+	</script>
+</body>
+</html>

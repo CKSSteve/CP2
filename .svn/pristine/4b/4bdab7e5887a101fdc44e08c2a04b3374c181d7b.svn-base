@@ -1,0 +1,66 @@
+package com.uxb2b.ecp.daemon;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.uxb2b.ecp.bean.swift.Q02RsBean;
+import com.uxb2b.ecp.business.IDownloadAwardDataBusiness;
+import com.uxb2b.ecp.service.SystemInfo;
+
+/**
+ * 下載決標資料排程
+ * @author evayang
+ *
+ */
+public class DownloadAwardData {
+	
+	private Logger log = LoggerFactory.getLogger(DownloadAwardData.class);
+	
+	@Autowired
+	private SystemInfo systemInfo; 
+	
+	@Autowired
+	private IDownloadAwardDataBusiness iDownloadAwardDataBusiness; 
+	
+	public void process() {
+		String jobEnable = systemInfo.getDownloadAwardDataDaemonEnabl().get("download.awarddata.daemon.enabl"); 
+		
+		if (jobEnable == null || StringUtils.equalsIgnoreCase(jobEnable, "N")) {
+		    log.info("[downloadAwardDataDaemon] Job disabled, do nothing!", jobEnable);
+		} else if (StringUtils.equalsIgnoreCase(jobEnable, "Y")) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			log.info("[downloadAwardDataDaemon] Daemon Start：{}", sdf.format(new Date()));
+			startDownloadAwardData();
+			log.info("[downloadAwardDataDaemon] Daemon End：{}", sdf.format(new Date()));
+		}
+		
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void startDownloadAwardData() {
+		
+		try {	
+			List<Q02RsBean> q02RsBeanList = iDownloadAwardDataBusiness.sendQ02Rq();
+			
+			for(Q02RsBean q02RsBean : q02RsBeanList){
+				Q02RsBean resultBean = iDownloadAwardDataBusiness.vaildQ02RsData(q02RsBean);
+				if(resultBean != null){
+					iDownloadAwardDataBusiness.downloadAwardDataRsLogic(resultBean);
+				}
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("[downloadAwardDataDaemon] Exception：", e);
+			
+		}
+
+    } 
+
+}

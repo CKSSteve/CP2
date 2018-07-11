@@ -1,0 +1,54 @@
+package com.uxb2b.ecp.service;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
+import org.dom4j.Document;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.SAXReader;
+import org.dom4j.io.XMLWriter;
+
+public class XMLUtils {
+
+	public static Document createDocument(byte[] data) throws Exception {
+		ByteArrayInputStream bais = new ByteArrayInputStream(data);
+		return createDocument(bais);
+	}
+	
+	public static Document createDocument(InputStream is) throws Exception {
+		SAXReader reader = new SAXReader();
+	    Document document = reader.read(is);
+	    return document;
+	}
+	
+	public static byte[] doc2bytes(Document doc, Boolean pretty) throws Exception {
+		OutputFormat format = null;
+		if (pretty != null) {
+			if (pretty) {
+				format = OutputFormat.createPrettyPrint();
+			} else {
+				format = OutputFormat.createCompactFormat();
+			}
+		}
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        XMLWriter writer = null;
+        if (format == null) {
+        	writer = new XMLWriter(baos);
+        } else {
+        	writer = new XMLWriter(baos, format);
+        }
+        writer.write(doc);
+        return baos.toByteArray();
+	}
+	
+	public static String doc2String(Document doc, Boolean pretty) throws Exception {
+		byte[] result = doc2bytes(doc, pretty);
+		String encoding = doc.getXMLEncoding();
+		if (encoding == null || encoding.trim().length() == 0) {
+			encoding = "utf-8";
+		}
+        return new String(result, encoding);
+	}
+	
+}

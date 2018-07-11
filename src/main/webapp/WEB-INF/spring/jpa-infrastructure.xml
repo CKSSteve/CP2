@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc 
+						http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd
+						http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+		                http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context-4.1.xsd
+                        http://www.springframework.org/schema/jee 
+                        http://www.springframework.org/schema/jee/spring-jee-4.1.xsd">
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">  
+        <property name="packagesToScan" value="com.uxb2b.ecp.model" />
+        <property name="dataSource" ref="dataSource" />  
+        <property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+				<property name="generateDdl" value="false" />
+				<property name="showSql" value="true" />
+				<property name="database" value="SQL_SERVER" />
+			</bean>
+		</property>
+		<property name="jpaProperties">
+         <props>
+            <prop key="hibernate.jdbc.fetch_size">50</prop>
+            <prop key="hibernate.jdbc.batch_size">25</prop>
+            <prop key="hibernate.show_sql">true</prop>
+            <prop key="hibernate.format_sql">true</prop>
+         </props>
+      </property>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">    
+        <property name="entityManagerFactory" ref="entityManagerFactory" />    
+    </bean>
+    
+    <!-- 載入設定檔 -->
+    <context:property-placeholder location="/WEB-INF/spring/connection.properties"/>
+    <!-- DBS使用 dataSource -->
+    <!-- <jee:jndi-lookup id="dataSource" jndi-name="jdbc/ECP" cache="true" expected-type="javax.sql.DataSource"/> -->
+    
+    <!-- 本機使用connection pool -->
+    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClass}"/> 
+        <property name="url" value="${jdbc.jdbcUrl}"/>   
+        <property name="username" value="${jdbc.user}"/>  
+        <property name="password" value="${jdbc.password}"/>  
+        <property name="validationQuery" value="${jdbc.validationQuery}"/>
+        <property name="maxActive" value="100" />  
+        <property name="maxIdle" value="10" />
+        <property name="maxWait" value="10000" />
+        <property name="initialSize" value="10" />
+        
+        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedTimeout" value="60" />
+        <property name="logAbandoned" value="true" />
+        <property name="testOnBorrow" value="true" />
+        <property name="testOnReturn" value="false" />
+        <property name="numTestsPerEvictionRun" value="10" />
+		<property name="testWhileIdle" value="true" />
+        <property name="minIdle" value="5" />   
+        <property name="defaultAutoCommit" value="true" />  
+        <property name="timeBetweenEvictionRunsMillis" value="3600000" />  
+        <property name="minEvictableIdleTimeMillis" value="3600000" />  
+    </bean>   
+</beans>

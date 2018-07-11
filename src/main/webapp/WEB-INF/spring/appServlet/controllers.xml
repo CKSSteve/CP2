@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jaxws="http://cxf.apache.org/jaxws" 
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   					   http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+						   http://www.springframework.org/schema/context 
+						   http://www.springframework.org/schema/context/spring-context-4.3.xsd
+						   http://www.springframework.org/schema/mvc 
+						   http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+					       http://cxf.apache.org/jaxws   
+					       http://cxf.apache.org/schemas/jaxws-4.3.xsd">
+
+	<!-- Maps '/' requests to the 'home' view -->
+	<mvc:view-controller path="/" view-name="login"/>
+	<mvc:view-controller path="/login" view-name="login"/>
+	<mvc:view-controller path="/changPassword" view-name="login"/>
+	<mvc:view-controller path="/sessionTimeout" view-name="login"/>
+	<mvc:view-controller path="/logoutPage" view-name="login"/>
+
+	
+<!-- 	<mvc:view-controller path="/security/loginEntp*" view-name="redirectLogin"/> -->
+
+
+    <!-- 這邊定義特定 package 底下的程式
+                        確保其中若有使用到 Annotation ( 如 @Controller 、@Service... ) 的程式會被找到。 -->
+    <context:component-scan base-package="com.uxb2b.ecp.web.controller" />
+    
+</beans>

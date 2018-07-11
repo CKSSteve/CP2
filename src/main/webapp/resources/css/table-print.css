@@ -1,0 +1,283 @@
+
+.dline01{background:url(../images/line.gif) repeat-x;padding-top:3px;padding-bottom:3px;} /*無底色*/
+.undline01{background:url(../images/line.gif) repeat-x bottom;padding-top:3px;padding-bottom:3px;} /*無底色*/
+
+/*.dline02{background:#FFFFCC url(../images/line.gif) repeat-x;padding-top:1px;} 黃底*/
+/*.dline05{background:url(../images/line.gif) repeat-x;padding-top:3px;padding-bottom:3px;} 無底色*/
+/*
+#table_title{
+	border-bottom:4px solid #FF9933;
+	margin:1px;
+	color:#0A4B96;
+	text-align:left;
+	font-size:12pt;
+	margin-top:10px;
+}
+#table_title2{
+	border-top:4px solid #FF9933;
+	margin:1px;
+	color:#0A4B96;
+	text-align:left;
+	font-size:12pt;
+	margin-top:10px;
+}
+#table_title td{
+	padding:5px;
+}
+#table_inq{
+	border-bottom:4px solid #FF9933;
+	margin:1px;
+	color:#0A4B96;
+	text-align:left;
+	font-size:10pt;
+}
+#table_inq td{
+	padding:5px;
+}
+*/
+
+/*--完成訊息視窗--*/
+#table_msg{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	color:#0A4B96;/*深藍色*/
+}
+#table_msg th{
+	padding:3px 3px 3px 3px;
+	text-align:center;
+	font-size:11pt;
+	background:#ffffff;
+	font-weight:normal;
+	letter-spacing:5px;
+	color:#000000;
+}
+#table_msg td{
+	padding:2px 3px 3px 3px;
+	text-align:center;
+	font-size:11pt;
+}
+/*--明細列視窗--*/
+#table01{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	border-left:1px solid #000000;
+	border-bottom:2px solid #000000;
+	margin:0px 0px 0px 0px;
+	color:#333333;
+}
+#table01 th {
+	padding:3px 3px 3px 3px;
+	border-right:1px solid #000000;
+	font-size: 12px;
+	font-weight:normal;
+	line-height: 160%;
+	color: #000000;
+	background-color:#ffffff;
+}
+#table01 td{
+	padding:3px;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	font-size: 12px;
+	line-height: 160%;
+	text-align:center;
+}
+
+#table02{
+	font-size:13px;
+	border-top:1px solid #000000;
+	border-left:1px solid #000000;
+	margin:0px 0px 0px 0px;
+	color:#000000;
+	border-bottom:3px solid #000000;
+}
+#table02_noborder{
+	margin:1px 0px 0px 0px;
+	color:#333333;
+	font-size:14px;
+	border-bottom:3px solid #000000;
+	line-height: 180%;
+}
+#table02 th {
+	padding:2px 0px 3px 0px;
+	font-family:sans-serif,Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size: 12px;
+	color: #000000;
+	background-color:#ffffff;
+	font-weight:normal;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	line-height: 20px;
+}
+#table02 td{
+	font-size: 13pt;
+	line-height: 180%;
+	text-align:left;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	padding:3px;
+}
+#table02_noborder h2{
+ color:#333333;
+ font-size:14pt;
+}
+#table03{
+	border-top:1px solid #333333;
+	border-left:1px solid #333333;
+	margin:1px 0px 0px 0px;
+	color:#333333;
+}
+#table03 th {
+	padding:2px 0px 3px 0px;
+	font-family:sans-serif,Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size: 12px;
+	color: #000000;
+	background-color:#000000;
+	font-weight:normal;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	line-height: 20px;
+}
+#table03 td{
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size: 12px;
+	line-height: 180%;
+	text-align:center;
+	border-right:1px solid #333333;
+	border-bottom:1px solid #333333;
+	padding:4px;
+}
+#table04 td{
+	color:#333333;
+	font-size: 12px;
+	padding:4px;
+	line-height: 180%;
+}
+#table05{
+	border-left:1px solid #000000;
+	margin:1px auto 0px auto;
+	color:#333333;
+	border-top:2px solid #000000;
+	border-bottom:2px solid #000000;
+}
+#table05 th {
+	/*font-family:sans-serif,Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;*/
+	font-size: 12px;
+	color: #000000;
+	background-color:#ffffff;
+	font-weight:normal;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	line-height: 20px;
+}
+#table05 td{
+	/*font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;*/
+	font-size: 12px;
+	line-height: 180%;
+	text-align:center;
+	border-right:1px solid #000000;
+	border-bottom:1px solid #000000;
+	padding:4px;
+}
+
+/*
+#table_cell{
+	border-bottom:1px solid #333333;
+	font-family:sans-serif,"新細明體","細明體",sans-serif;
+	font-size: 12px;
+	color:#006400;
+	line-height: 150%;
+	padding:5px 0;
+}
+#table_cell a:link,#table_cell a:visited,#table_cell a:active{
+	color:#636563;
+	line-height:150%;
+	text-decoration: none;
+	margin:2px 0px 2px 0px;
+}
+#table_cell a:hover{
+	color:#0066CC;
+	text-decoration: underline;
+}
+#table_cell td{
+	border-right: none;
+	border-bottom: none;
+	line-height: 20px;
+}
+*/
+#table-count{
+	padding:3px;
+}
+#table-count td{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size: 9pt;
+	color:#FF4500;
+	line-height: 150%;
+	border:0px;
+}
+#table_none{
+//	font-family:sans-serif, Geneva,Arial,Helvetica;
+	color:#333333;
+	border:0px;
+}
+
+#table_none a:link,#table_none a:visited,#table_none a:active{
+	color:#636563;
+	line-height:150%;
+	text-decoration: none;
+	margin:2px 0px 2px 0px;
+}
+#table_none a:hover{
+	color:#0066CC;
+	text-decoration: underline;
+}
+
+#table_none td{
+	line-height:150%;
+	text-align:left;
+	font-size: 14pt;
+	border-width:0px;
+}
+
+#table_10pt{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size: 10pt;
+	color:#333333;
+	line-height: 200%;
+	border:0px;
+}
+.td-lighty{
+	background-color:#FFEFD5;
+}
+.txt11-red{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	color:#50CCB1;
+	font-size: 11pt;
+	font-weight:bold;
+	text-align:center;
+	border-bottom:2px solid #D2691E;
+	padding:3px 3px 5px 3px;
+	letter-spacing:10px;
+}
+#table_header{
+	font-family:sans-serif, Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	color:#696969;
+	border:0px;
+	font-size:10pt;
+}
+#table_header a:link,#table_header a:visited,#table_header a:active{
+	color:#000000;
+	line-height:150%;
+	text-decoration: none;
+	margin:2px 0px 2px 0px;
+}
+#table_header a:hover{
+	color:#800000;
+	text-decoration: underline;
+}
+#table_header td{
+	color:#000000;
+	line-height:150%;
+	text-align:left;
+	font-size: 9pt;
+	border-width:0px;
+	vertical-align:top;
+}

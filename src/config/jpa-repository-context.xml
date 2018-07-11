@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<import resource="jpa-infrastructure.xml" />
+
+    <!-- Spring 初始化容器時會掃瞄base-package 指定的package及其子目錄，為繼承Repository或其子介面創建 -->
+    <!-- repository-impl-postfix 指定實作類別的後綴名 -->
+    <jpa:repositories base-package="com.uxb2b.ecp.repository"/>   
+
+</beans>

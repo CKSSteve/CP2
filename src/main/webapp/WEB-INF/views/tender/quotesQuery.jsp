@@ -1,0 +1,253 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="tags" tagdir="/WEB-INF/tags"%>
+
+<html>
+<head>
+<c:if test="${message!=null && !empty message}">
+  <script type="text/javascript">
+  alert('<c:out value="${message}" />');
+  </script>
+  </c:if>
+  
+<script type="text/javascript" language="javascript">
+
+$(function() {
+	$("#quotesDateStartDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+   	
+	$("#quotesDateEndDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+ 	
+   	$("#query").click(function(){		
+		var quotesStartDate = $("#quotesDateStartDate").val();
+		var quotesEndDate = $("#quotesDateEndDate").val();
+		if (quotesStartDate.length != 0 && quotesEndDate.length != 0 && quotesStartDate > quotesEndDate) {
+			alert("報價起始日期不能小於結束日期");
+			return false;
+		} 
+			$("#queryForm").attr("action", '<c:url value="/quotesQuery/doQuery"/>');
+			$("#queryForm").submit();
+		
+	
+	});
+})
+
+function showTenderDetail(varTenderNo){
+	$("#detailTenderNo").val(varTenderNo);
+	$("#method").val("/quotesQuery/doQuery");
+	$("#queryForm").attr("action", '<c:url value="/tenderQuery/showDetail"/>');
+	$("#queryForm").submit();
+}
+
+function showQuationDetail(varQuationNo){
+	$("#detailQuationNo").val(varQuationNo);
+	$("#method").val("/quotesQuery/doQuery");
+	$("#queryForm").attr("action", '<c:url value="/quotesQuery/showDetail"/>');
+	$("#queryForm").submit();
+}
+
+</script>
+</head>
+
+<body id="scroller">
+<h1><span class="title-l">報價單查詢</span>-請選擇查詢方式</h1>
+<form:form id="queryForm" name="queryForm" method="POST" commandName="searchBean">
+   <input id="method" type="hidden" name="method">
+   <input id="toPage" type="hidden" name="page">
+   <input id="detailTenderNo" type="hidden" name="detailTenderNo">
+   <input id="detailQuationNo" type="hidden" name="detailQuationNo">
+ <table width="88%" border="0" align="left" cellpadding="0" cellspacing="0">
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" /></td>
+    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" /></td>
+  </tr>
+  <tr>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+    <td>
+      <table width="88%" border="0" align="left" cellpadding="0" cellspacing="0" id="table05">
+      		<tr>
+			<th width="110">發行人統編</th>
+			<td colspan="3">
+				<div align="left">
+					<select  name="issuerId" id="issuerId">
+						<option value="0" label="全部" />
+						<c:forEach var="issuerId" items="${issuerIdList}">
+							<c:choose>
+							<c:when test="${searchBean.issuerId == issuerId.uni}">
+		           				<option value="${issuerId.uni}" selected="selected">
+		           				<c:out value="${issuerId.uni}" />&nbsp;<c:out value="${issuerId.chineseName}" /></option>
+		           			</c:when>
+		           			<c:otherwise>
+								<option value="${issuerId.uni}">
+									<c:out value="${issuerId.uni}" />&nbsp;<c:out value="${issuerId.chineseName}" />
+								</option>
+							</c:otherwise>
+							</c:choose>
+						</c:forEach>
+					</select>
+				</div>
+			</td>
+		</tr>
+      	<tr>
+          <th width="110"><span>報價日期</span></th>
+            <td><div align="left">自
+                <input type="Date pickers" id="quotesDateStartDate" name="quotesDateStartDate" value="${searchBean.quotesDateStartDate }" class="textfield dateISO" size="10"/>
+                	至
+                <input type="Date pickers" id="quotesDateEndDate" name="quotesDateEndDate" value="${searchBean.quotesDateEndDate }" class="textfield dateISO" size="10" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+        	<th width="110">報價狀態</th>
+			<td>
+				<div align="left">
+          			<form:checkbox path="statusTypeArray" value="080"/>未報價
+          			<form:checkbox path="statusTypeArray" value="100"/>已報價
+          			<form:checkbox path="statusTypeArray" value="090"/>不報價
+          		</div>
+			</td>
+        </tr>
+        <tr>
+        	<th width="110">審核狀態</th>
+        	<td>
+				<div align="left">
+          			<form:checkbox path="approveStatusTypeArray" value="0"/>待登錄
+          			<form:checkbox path="approveStatusTypeArray" value="1"/>主管退回
+          			<form:checkbox path="approveStatusTypeArray" value="2"/>待覆核
+          			<form:checkbox path="approveStatusTypeArray" value="3"/>待放行
+          			<form:checkbox path="approveStatusTypeArray" value="4"/>已放行
+          		</div>
+			</td>
+        </tr>
+		<tr>
+			<th width="110">幣別</th>
+			<td colspan="3">
+				<div align="left">
+					<select  name="currencyId" id="currencyId">
+						<option value="0" label="全部" />
+						<c:forEach var="currency" items="${currencyList}">
+						<c:choose>
+							<c:when test="${searchBean.currencyId == currency.id.codeKey}">
+			           			<option value="${currency.id.codeKey}" selected="selected">
+									<c:out value="${currency.id.codeKey}" />&nbsp;<c:out value="${currency.codeValue}" />
+								</option>
+			           		</c:when>
+			           		<c:otherwise>
+								<option value="${currency.id.codeKey}">
+									<c:out value="${currency.id.codeKey}" />&nbsp;<c:out value="${currency.codeValue}" />
+								</option>
+							</c:otherwise>
+						</c:choose>
+
+						</c:forEach>
+					</select>
+				</div>
+			</td>
+		</tr>
+	  </table>      
+      </td>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" /></td>
+    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" /></td>
+  </tr>
+</table>
+
+
+  <table width="88%" border="0" align="left" cellpadding="0" cellspacing="0">
+    <tr class="pbtn">
+      <td>
+        <br />
+        <input type="reset" name="reset" value="重設" class="button-brown"/>
+        <input type="button" name="query" id="query" value="確認" class="button-brown"/>
+      </td>
+    </tr>
+  </table>
+</form:form>
+
+<c:if test="${showForm}">
+
+
+	<h1>報價單查詢-<span class="title-l">查詢列表</span></h1>
+	
+	<table width="88%" border="0" align="left" cellpadding="0" cellspacing="0">
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	  <tr>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+	    <td>
+	    <div id="htmlBody">
+	    <table width="98%" border="0" align="center" cellpadding="2" cellspacing="0" id="table01">
+	      <tr class="cell-title">
+	      	<th nowrap="nowrap">報價單號碼</th>
+	      	<th nowrap="nowrap">標單號碼</th>
+	      	<th nowrap="nowrap">發行人</th>
+	        <th nowrap="nowrap">報價日期</th>
+	        <th nowrap="nowrap">幣別</th>
+	        <th nowrap="nowrap">籌資金額</th>
+	        <th nowrap="nowrap">可承作金額</th>
+	        <th nowrap="nowrap">起始日期</th>
+	        <th nowrap="nowrap">報價狀態</th>
+	        <th nowrap="nowrap">審核狀態</th>
+		  </tr>
+      <c:if test="${queryQuotesList.totalElements > 0}">	     
+	      <c:forEach items="${queryQuotesList.content }" var="item" varStatus="idx" >
+		      <tr class="<c:out value="${idx.index%2 eq 0 ? '' : 'td-lighty' }" />">
+		        <td align="center" nowrap="nowrap"><a href="#" onclick="showQuationDetail('<c:out value="${item.quationNo}"/>')"><c:out value="${item.quationNo}"/></a></td>
+		        <td align="center" nowrap="nowrap"><a href="#" onclick="showTenderDetail('<c:out value="${item.tenderNo}"/>')"><c:out value="${item.tenderNo}"/></a></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.issuerId}"/>&nbsp;<c:out value="${item.issuerName}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.quationTime}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.currencyName}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.loanAmount}"/>&nbsp;<c:out value="${item.amountUnit}"/></td> 
+		        <td align="center" nowrap="nowrap"><c:out value="${item.maxAmount}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.effectDate}"/></td>
+		        <td align="center" nowrap="nowrap"><tags:codeMap type="CTBFLBQ1_STATUS" code="${item.status}"/></td>
+		        <td align="center" nowrap="nowrap"><tags:codeMap type="CTBFLBQ1_APPROVE_STATUS" code="${item.approveStatus}"/></td>
+		        
+		      </tr>
+		  </c:forEach>
+       </c:if>
+		<c:if test="${queryQuotesList.totalElements == 0}">
+				     <tr>
+					     <td colspan="7">
+					           <font size="3" color="red">查無資料!</font>
+					      </td>
+					 </tr>
+		</c:if>       		  
+	    </table>
+	    </div>
+	    </td>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+	  </tr>
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	</table>
+</c:if>
+
+			<!-- 分頁  -->
+			<c:if test="${queryQuotesList.totalPages > 1}">
+				<table width="98%" border="0" align="center" cellpadding="0"
+					cellspacing="0" id="table-count">
+					<tr>
+						<tags:pagination page="${queryQuotesList}" paginationSize="5" />
+					</tr>
+				</table>
+			</c:if>
+			<!-- 分頁結束 -->
+			
+</body>
+</html>

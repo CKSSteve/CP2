@@ -1,0 +1,132 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="tags" tagdir="/WEB-INF/tags"%>
+<html>
+<head>
+<script type="text/javascript">
+
+function deleteRole(roleId,roleName){
+  if(confirm("確定刪除角色代碼["+roleId+"]")){
+	 $('input[name="roleId"]').val(roleId);
+	 $('input[name="roleName"]').val(roleName);
+	 $("#queryForm").attr("action", '<c:url value="/roleSetting/deleteRole"/>')
+	 $("#queryForm").submit();
+  }else
+    return false;
+}
+
+function settingFunctionPage(roleId,roleName) {
+	 $('input[name="roleId"]').val(roleId);
+	 $('input[name="roleName"]').val(roleName);
+	 $("#queryForm").attr("action", '<c:url value="/roleSetting/settingFunction"/>')
+	 $("#queryForm").submit();
+}
+
+</script>
+</head>
+
+<body id="scroller">
+<h1><span class="title-l">角色權限維護清冊</span></h1>
+<form:form name="queryForm" id="queryForm" method="post">
+<input id="toPage" type="hidden" name="page">
+<table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" alt=""></td>
+    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>
+) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" alt=""></td>
+  </tr>
+  <tr>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+    <td><table width="98%" border="0" align="left" cellpadding="0" cellspacing="0" id="table_none">
+      <tr>
+        <td height="30"><img src="<c:url value="/resources/images/page.gif"/>" border="0" align="absmiddle" alt="">以下為所有角色明細資料，請點選<span class="red"> [新增角色]</span> 功能，或利用 <img src="<c:url value="/resources/images/icon/icon_03.gif"/>" width="9" height="9" alt=""> 點選角色資料進行權限設定。</td>
+      </tr>
+    </table>
+      <table width="98%" border="0" align="left" cellpadding="2" cellspacing="0" id="table01">
+        <TR>
+          <th align="middle">權限設定</th>
+          <th align="middle">角色代碼</th>
+          <th align="middle">角色名稱</th>
+          <th align="middle">角色說明</th>
+          <th align="middle">角色種類</th>
+          <th align="middle">刪除</th>
+        </TR>
+        <c:forEach var="role" items="${rolesList.content}" varStatus="i">
+          <c:choose>
+            <c:when test="${role.roleId==1}">
+              <TR class="<c:out value="${(i.index%2==0) ? '' : 'td-lighty'}" />">
+                <TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+                <TD><c:out value="${role.roleId}" /></TD>
+                <TD><c:out value="${role.roleName}" /></TD>
+                <TD><c:out value="${role.memo}" /></TD>
+                <TD>預設-(系統管理員)</TD>
+                <TD>　</TD>
+              </TR>
+            </c:when>
+            <c:otherwise>
+              <TR class="<c:out value="${(i.index%2==0) ? '' : 'td-lighty'}" />">
+                <TD>
+                	<A href="#" style="cursor:hand" onclick="settingFunctionPage('<c:out value="${role.roleId}" />','<c:out value="${role.roleName}" />')">
+                	<img src="<c:url value="/resources/images/icon/icon_03.gif"/>" width="10" height="10" border="0" alt="" title="修改"></A>
+                </TD>
+                <TD><c:out value="${role.roleId}" /></TD>
+                <TD><c:out value="${role.roleName}" /></TD>
+                <TD><c:out value="${role.memo}" />&nbsp;</TD>
+                <TD>自訂-(一般使用者)</TD>
+                <TD>
+
+                  <c:set var="isDelete" value="false"/>
+                  <c:forEach var="userRoles" items="${usersList}">
+                      <c:if test="${userRoles.roleId ==role.roleId }">
+                        <c:set var="isDelete" value="true"/>
+                      </c:if>
+                  </c:forEach>
+
+                  <c:choose>
+                    <c:when test="${isDelete}">
+                      此角色已被指派,無法刪除
+                    </c:when>
+                    <c:otherwise>
+                      <A href="#" style="cursor:hand" onclick="deleteRole('<c:out value="${role.roleId}" />','<c:out value="${role.roleName}" />');">
+                      <img src="<c:url value="/resources/images/del.gif"/>" width="20" height="20" border="0" alt="" title="刪除"></A>
+                    </c:otherwise>
+                  </c:choose>
+                </TD>
+              </TR>
+            </c:otherwise>
+          </c:choose>
+        </c:forEach>
+
+      </table>
+    </td>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" alt=""></td>
+    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" alt=""></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" alt=""></td>
+  </tr>
+  	<!-- 分頁  -->
+			<c:if test="${rolesList.totalPages > 1}">
+				<table width="98%" border="0" align="center" cellpadding="0"
+					cellspacing="0" id="table-count">
+					<tr>
+						<tags:pagination page="${rolesList}" paginationSize="5" />
+					</tr>
+				</table>
+			</c:if>
+			<!-- 分頁結束 -->
+</table>
+<p class="pbtn">
+  <input name="cancel" type="button" class="button-brown" onClick="window.location.href='<c:out value="${pageContext.request.contextPath}" />/todoMain'" value="回首頁">
+  &nbsp;
+  <input name="add" type="button" class="button-brown" onClick="javascript:location.href='<%=request.getContextPath()%>/roleSetting/newRole'" value="新增角色">
+
+</p>
+<input type="hidden" name="roleId" value=""/>
+<input type="hidden" name="roleName" value=""/>
+</form:form>
+</body>
+</html>

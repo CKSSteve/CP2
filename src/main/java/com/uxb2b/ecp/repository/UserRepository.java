@@ -1,0 +1,43 @@
+package com.uxb2b.ecp.repository;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import com.uxb2b.ecp.model.User;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Integer>,PagingAndSortingRepository<User, Integer>, JpaSpecificationExecutor<User> {
+
+	
+	public User findByUserIdAndPassword(String userId, String password);
+	
+	
+	public User findByUserId(String userId);
+
+	@Modifying
+	@Query("UPDATE  User d SET  d.loginCount = :loginCount,d.lastLoginTime = :lastLoginTime , d.errorCount = :errorCount WHERE d.userId = :userId")
+	public void updateLoginSuccess(@Param("userId") String userId , @Param("loginCount") int loginCount ,@Param("lastLoginTime") Timestamp lastLoginTime, @Param("errorCount") int errorCount);
+	
+	@Modifying
+	@Query("UPDATE  User d SET  d.errorCount = :errorCount ,d.lastErrorTime = :lastErrorTime  WHERE d.userId = :userId")
+	public void updateLoginError(@Param("userId") String userId , @Param("errorCount") int errorCount ,@Param("lastErrorTime") Timestamp lastErrorTime);
+	
+	@Modifying
+	@Query("UPDATE  User d SET d.password = :password ,d.changePasswordTime = :changePasswordTime WHERE d.userId = :userId")
+	public void changePwd(@Param("userId") String userId , @Param("password") String password ,@Param("changePasswordTime") Timestamp changePasswordTime);
+	
+//	@Query("SELECT  d FROM User d WHERE d.branchId = :branchId")
+	public Page<User> findByBranchId(String branchId,Pageable pageRequest);
+	
+	public List<User> findByRoleIdAndBranchId(int roleId ,String branchId);
+}

@@ -1,0 +1,412 @@
+<%@ tag body-content="empty" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ attribute name="type" required="true" rtexprvalue="true" type="java.lang.Object" description="類別" %>
+<%@ attribute name="code" required="true" rtexprvalue="true" type="java.lang.Object" description="Code" %>
+<%@ attribute name="prodType" required="false" rtexprvalue="true" type="java.lang.Object" description="prodType" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+
+<c:if test="${type eq 'CTBFLBT1_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '000'}">製作中</c:when>
+	  <c:when test="${code eq '010'}">已退回</c:when>
+	  <c:when test="${code eq '090'}">已刪除</c:when>
+	  <c:when test="${code eq '100'}">陳核中</c:when>
+	  <c:when test="${code eq '200'}">已核可</c:when>
+	  <c:when test="${code eq '300'}">已發送</c:when>
+	  <c:when test="${code eq '310'}">決標已退回</c:when>
+	  <c:when test="${code eq '390'}">已廢標</c:when>
+	  <c:when test="${code eq '400'}">決標陳核可</c:when>
+	  <c:when test="${code eq '500'}">決標核可</c:when>
+	  <c:when test="${code eq '600'}">決標單已發送</c:when>
+	  <c:when test="${code eq '700'}">標單結案</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'REJECT_REASON_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq 'REJECT-A1'}">報價</c:when>
+	  <c:when test="${code eq 'REJECT-B1'}">本票</c:when>
+	  <c:when test="${code eq 'REJECT-B5'}">費率</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'REJECT_REASON_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">暫停使用</c:when>
+	  <c:when test="${code eq '1'}">可使用</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'USERLOG_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq 'Success'}">成功</c:when>
+	  <c:when test="${code eq 'Failure'}">失敗</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CTBFLBQ1_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '100'}">已報價</c:when>
+	  <c:when test="${code eq '080'}">未報價</c:when>
+	  <c:when test="${code eq '090'}">不報價</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CTBFLBQ1_APPROVE_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">待登錄</c:when>
+	  <c:when test="${code eq '1'}">主管退回</c:when>
+	  <c:when test="${code eq '2'}">待覆核</c:when>
+	  <c:when test="${code eq '3'}">待放行</c:when>
+	  <c:when test="${code eq '4'}">已放行</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CTBFLBQ2_LOAN_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq 'A'}">CP2</c:when>
+	  <c:when test="${code eq 'B'}">短貸</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CTBFLBQ2_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '180'}">廢標</c:when>
+	  <c:when test="${code eq '190'}"><div style="color:red">未得標</div></c:when>
+	  <c:when test="${code eq '200'}"><div style="color:red">已得標</div></c:when>
+	  <c:when test="${code eq '290'}"><div style="color:red">已放棄</div></c:when>
+	  <c:when test="${code eq '300'}"><div style="color:red">已同意</div></c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'GUARANTEE_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq 'A'}">免保證</c:when>
+	  <c:when test="${code eq 'B'}">需保證</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CPDATA_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">EOD拒絕</c:when>
+	  <c:when test="${code eq '3'}">等待與票券商比對</c:when>
+	  <c:when test="${code eq '4'}">BCSS回應接收</c:when>
+	  <c:when test="${code eq '5'}">發行失敗，請與票券商確認</c:when>
+	  <c:when test="${code eq '6'}">比對中</c:when>
+	  <c:when test="${code eq '7'}">完成發行登錄</c:when>
+	  <c:when test="${code eq '9'}">取消</c:when>
+	  <c:when test="${code eq '10'}">等待兌償</c:when>
+	  <c:when test="${code eq '11'}">已兌償</c:when>
+	  <c:when test="${code eq '12'}">已退票</c:when>
+	  <c:when test="${code eq '13'}">等待保證人經辦確認(登錄)</c:when>
+	  <c:when test="${code eq '14'}">等待保證人主管確認</c:when>
+	  <c:when test="${code eq '15'}">等待保證人主管確認拒絕</c:when>
+	  <c:when test="${code eq '16'}">等待保證人主管取消發行登錄</c:when>
+	  <c:when test="${code eq '17'}">等待保證人經辦確認(取消)</c:when>
+	  <c:when test="${code eq '18'}">保證人拒絕保證(登錄)</c:when>
+	  <c:when test="${code eq '20'}">保證人拒絕保證(取消)</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'PASS_RECORD_TXID'}">
+	<c:choose>
+	  <c:when test="${code eq 'T01'}">上傳標單狀態</c:when>
+	  <c:when test="${code eq 'T02'}">上傳報價單 </c:when>
+	  <c:when test="${code eq 'T03'}">上傳票券批號(得標確認)</c:when>
+	  <c:when test="${code eq 'T05'}">上傳本票帳務明細 </c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'PASS_RECORD_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq 'A'}">傳送成功</c:when>
+	  <c:when test="${code eq 'B'}">傳送失敗</c:when>
+	  <c:when test="${code eq 'C'}">傳送中</c:when>
+	  <c:when test="${code eq 'D'}">待重送</c:when>
+	</c:choose>
+</c:if>
+
+<!-- ----------- -->
+<c:if test="${type eq 'BANK_USER_MODIFY_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">待審核</c:when>
+	  <c:when test="${code eq '2'}">已啟用</c:when>
+	  <c:when test="${code eq '3'}">退件</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ROLE_DATA_MODIFY_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">待審核</c:when>
+	  <c:when test="${code eq '2'}">核准</c:when>
+	  <c:when test="${code eq '3'}">退回</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'MODIFY_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">新增</c:when>
+	  <c:when test="${code eq '2'}">修改</c:when>
+	  <c:when test="${code eq '3'}">刪除</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ROLE_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq 0}">預設-(系統管理員)</c:when>
+	  <c:when test="${code eq 1}">自訂-(一般使用者)</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'BIZ_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq 'O'}">O:結購</c:when>
+	  <c:when test="${code eq 'I'}">I:結售</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'SETTLEMENT_INSTRUCTION'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">未對應</c:when>
+	  <c:when test="${code eq '1'}">Foreign Currency outward payment</c:when>
+	  <c:when test="${code eq '2'}">Foreign Currency inward payment</c:when>
+	  <c:when test="${code eq '3'}">Account Transfer within DBS TW</c:when>
+	  <c:when test="${code eq '4'}">Trade Finance Settlement – Open Account Financing</c:when>
+	  <c:when test="${code eq '6'}">Trade Finance Settlement – Others</c:when>
+	  <c:when test="${code eq '7'}">Loan outward payment</c:when>
+	  <c:when test="${code eq '8'}">Loan inward payment</c:when>
+	  <c:when test="${code eq '9'}">Trade Finance Settlement – Supply Chain Financing</c:when>
+	  <c:when test="${code eq '10'}">Others</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'STS_TRAN_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">DOL</c:when>
+	  <c:when test="${code eq '2'}">TZ</c:when>
+	  <c:when test="${code eq '3'}">CBC</c:when>
+	  <c:when test="${code eq '4'}">RET</c:when>
+	  <c:when test="${code eq '5'}">IDEAL</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DATA_SOURCE'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">DOL</c:when>
+	  <c:when test="${code eq '2'}">MURX</c:when>
+	  <c:when test="${code eq '3'}">FINA</c:when>
+	  <c:when test="${code eq '4'}">IMEX</c:when>
+	  <c:when test="${code eq '5'}">IPE</c:when>
+	  <c:when test="${code eq '6'}">IDEAL</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DECLARANT_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">公司行號</c:when>
+	  <c:when test="${code eq '2'}">團體</c:when>
+	  <c:when test="${code eq '3'}">我國國民</c:when>
+	  <c:when test="${code eq '4'}">持居留証者</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'BENEFICARY_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">本人</c:when>
+	  <c:when test="${code eq '1'}">他人</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DEC_APPLY_SUM_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">須占額度(佔額度但未達累計金額)</c:when>
+	  <c:when test="${code eq '1'}">無須占額度</c:when>
+	  <c:when test="${code eq '2'}">占額度-成功</c:when>
+	  <c:when test="${code eq '3'}">占額度-失敗</c:when>
+	  <c:when test="${code eq '4'}">取消交易/已占額度待審</c:when>
+	  <c:when test="${code eq '5'}">取消交易</c:when>
+	  <c:when test="${code eq '6'}">取消已占額度</c:when>
+	  <c:when test="${code eq '7'}">還原額度待審</c:when>
+	  <c:when test="${code eq '8'}">還原額度完成</c:when>
+	  <c:when test="${code eq '9'}">更正額度完成</c:when>
+	  <c:when test="${code eq 'A'}">處理中</c:when>
+	  <c:when test="${code eq 'B'}">人工處理</c:when>
+	  <c:when test="${code eq 'C'}">需占額度人工處理</c:when>
+	  <c:when test="${code eq 'D'}">無須累計(only e-form)</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'PROCESS_STATUS_MAP'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">還原待覆審</c:when>
+	  <c:when test="${code eq '2'}">取消待覆審</c:when>
+	  <c:when test="${code eq '3'}">修改產品別待覆審</c:when>
+	  <c:when test="${code eq '4'}">通知客戶修改</c:when>
+	  <c:when test="${code eq '5'}">客戶已修改/待審核</c:when>
+	  <c:when test="${code eq '6'}">客戶已修改/待覆審</c:when>
+	  <c:when test="${code eq '7'}">確認待覆審</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CBC_DEC_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">扣額度中</c:when>
+	  <c:when test="${code eq '1'}">成功</c:when>
+	  <c:when test="${code eq '2'}">失敗</c:when>
+	  <c:when test="${code eq '3'}">更正中</c:when>
+	  <c:when test="${code eq '4'}">還原中</c:when>
+	  <c:when test="${code eq '5'}">更正失敗</c:when>
+	  <c:when test="${code eq '6'}">還原失敗</c:when>
+	  <c:when test="${code eq '7'}">已還原</c:when>
+	  <c:when test="${code eq '8'}">已更正</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'NEED_DEC_DOC_FLAG'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">N</c:when>
+	  <c:when test="${code eq '1'}">Y</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DECLARANTION_DOC_FLAG'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">N</c:when>
+	  <c:when test="${code eq '1'}">Y</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ACTION_LOG_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">成功</c:when>
+	  <c:when test="${code eq '2'}">失敗</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'STS_LOG_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '1'}">成功</c:when>
+	  <c:when test="${code eq '2'}">失敗</c:when>
+	  <c:when test="${code eq '3'}">Time Out</c:when>
+	  <c:when test="${code eq '4'}">錯誤</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'CBC_DEC_CBC_STATUS'}">
+	<c:choose>
+	  <c:when test="${code eq '0001'}">准許匯款</c:when>
+	  <c:when test="${code eq '0002'}">經過確認准許將剩餘的額度全部匯款</c:when>
+	  <c:when test="${code eq '0003'}">更正額度完成</c:when>
+	  <c:when test="${code eq '0004'}">還原額度完成</c:when>
+	  <c:when test="${code eq '0005'}">查詢交易狀況完成</c:when>
+	  <c:when test="${code eq '0101'}">銀行代碼檢核錯誤</c:when>
+	  <c:when test="${code eq '0102'}">收件日期檢核錯誤</c:when>
+	  <c:when test="${code eq '0103'}">匯出入代號檢核錯誤</c:when>
+	  <c:when test="${code eq '0104'}">資料來源檢核錯誤</c:when>
+	  <c:when test="${code eq '0105'}">收件編號重複</c:when>
+	  <c:when test="${code eq '0106'}">身份別檢核錯誤</c:when>
+	  <c:when test="${code eq '0107'}">統一編號/身分證號等證號檢核錯誤</c:when>
+	  <c:when test="${code eq '0108'}">出生日期檢核錯誤</c:when>
+	  <c:when test="${code eq '0109'}">交易性質檢核錯誤</c:when>
+	  <c:when test="${code eq '0110'}">匯款金額檢核錯誤</c:when>
+	  <c:when test="${code eq '0111'}">居留證核發日期檢核錯誤</c:when>
+	  <c:when test="${code eq '0112'}">居留證有效日期檢核錯誤</c:when>
+	  <c:when test="${code eq '0113'}">額度已用完，拒絕匯款</c:when>
+	  <c:when test="${code eq '0114'}">其他錯誤</c:when>
+	  <c:when test="${code eq '0115'}">無該筆收件編號</c:when>
+	  <c:when test="${code eq '0116'}">無該筆查詢序號</c:when>
+	  <c:when test="${code eq '0117'}">查詢序號重複</c:when>
+	  <c:when test="${code eq '0118'}">收件編號檢核錯誤</c:when>
+	  <c:when test="${code eq '0119'}">新收件編號檢核錯誤</c:when>
+	  <c:when test="${code eq '0120'}">新銀行代碼檢核錯誤</c:when>
+	  <c:when test="${code eq '0121'}">額度不足，拒絕匯款</c:when>
+	  <c:when test="${code eq '0199'}">訊息類別、交易類別或發信單位檢核錯誤</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ADD_REPORT_DECLARANTION_DOC_FLAG'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">N</c:when>
+	  <c:when test="${code eq '1'}">Y</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ADD_REPORT_APPROVE_DOC_FLAG'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">N</c:when>
+	  <c:when test="${code eq '1'}">Y</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ADD_REPORT_INV_OVER_180_FLAG'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">N</c:when>
+	  <c:when test="${code eq '1'}">Y</c:when>
+	  <c:when test="${code eq '2'}">N/A</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'ACTION_TYPE'}">
+	<c:choose>
+	  <c:when test="${code eq '0'}">確認客戶已提供申報書</c:when>
+	  <c:when test="${code eq '1'}">確認還原當年累計額度</c:when>
+	  <c:when test="${code eq '2'}">核准覆審還原當年累計額度 </c:when>
+	  <c:when test="${code eq '3'}">退回覆審還原當年累計額度 </c:when>
+	  <c:when test="${code eq '4'}">確認取消交易/占當年累計額度</c:when>
+	  <c:when test="${code eq '5'}">刪除取消交易/占當年累計額度退件</c:when>
+	  <c:when test="${code eq '6'}">核准覆審取消交易/占當年累計額度</c:when>
+	  <c:when test="${code eq '7'}">退回覆審取消交易/占當年累計額度</c:when>
+	  <c:when test="${code eq '8'}">儲存維護規避申報書</c:when>
+	  <c:when test="${code eq '9'}">確認通知客戶修改申報書</c:when>
+	  <c:when test="${code eq '10'}">核准審核客戶修改後申報書</c:when>
+	  <c:when test="${code eq '11'}">退回審核客戶修改後申報書</c:when>
+	  <c:when test="${code eq '12'}">核准覆審客戶修改後申報書</c:when>
+	  <c:when test="${code eq '13'}">退回覆審客戶修改後申報書</c:when>
+	  <c:when test="${code eq '14'}">確認電子申報書內容</c:when>
+	  <c:when test="${code eq '15'}">核准覆審電子申報書內容</c:when>
+	  <c:when test="${code eq '16'}">退回覆審電子申報書內容</c:when>
+	  <c:when test="${code eq '17'}">新增角色權限維護</c:when>
+	  <c:when test="${code eq '18'}">刪除角色權限維護</c:when>
+	  <c:when test="${code eq '19'}">修改角色權限維護</c:when>
+	  <c:when test="${code eq '20'}">核准覆審角色權限維護</c:when>
+	  <c:when test="${code eq '21'}">退回覆審角色權限維護</c:when>
+	  <c:when test="${code eq '22'}">新增使用者設定</c:when>
+	  <c:when test="${code eq '23'}">刪除使用者設定</c:when>
+	  <c:when test="${code eq '24'}">修改使用者設定</c:when>
+	  <c:when test="${code eq '25'}">核准覆審使用者設定</c:when>
+	  <c:when test="${code eq '26'}">退回覆審使用者設定</c:when>
+	  <c:when test="${code eq '27'}">登入</c:when>
+	  <c:when test="${code eq '28'}">登出</c:when>
+	  <c:when test="${code eq '29'}">確認客戶修改申報資料</c:when>
+	  <c:when test="${code eq '30'}">確認修改產品別</c:when>
+	  <c:when test="${code eq '31'}">確認覆審修改產品別</c:when>
+	  <c:when test="${code eq '32'}">退回覆審修改產品別</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'REJECT_CODE'}">
+	<c:choose>
+		<c:when test="${code eq '1'}">錯誤</c:when>
+		<c:when test="${code eq '2'}">其他</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DECLARATION_SUB_TYPE_I'}">
+	<c:choose>
+		<c:when test="${code eq '1'}">結購外匯直接匯出</c:when>
+		<c:when test="${code eq '2'}">結購外匯轉匯國內他行</c:when>
+		<c:when test="${code eq '3'}">結購外匯存入外匯存款</c:when>
+		<c:when test="${code eq '4'}">結購外幣現鈔或旅行支票</c:when>
+		<c:when test="${code eq '5'}">其他 ( 請說明 )</c:when>
+	</c:choose>
+</c:if>
+
+<c:if test="${type eq 'DECLARATION_SUB_TYPE_O'}">
+	<c:choose>
+		<c:when test="${code eq '1'}">由國外匯入直接結售</c:when>
+		<c:when test="${code eq '2'}">由國內他行匯入結售</c:when>
+		<c:when test="${code eq '3'}">由外匯存款提出結售</c:when>
+		<c:when test="${code eq '4'}">以外幣現鈔或旅行支票結售</c:when>
+		<c:when test="${code eq '5'}">其他( 請說明 )</c:when>
+	</c:choose>
+</c:if>

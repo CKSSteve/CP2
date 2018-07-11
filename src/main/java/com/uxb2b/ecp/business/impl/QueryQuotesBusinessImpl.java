@@ -1,0 +1,86 @@
+package com.uxb2b.ecp.business.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+
+import com.uxb2b.ecp.bean.QueryQuotesBean;
+import com.uxb2b.ecp.bean.QueryTenderBean;
+import com.uxb2b.ecp.model.Branch;
+import com.uxb2b.ecp.business.IQueryQuotesBusiness;
+import com.uxb2b.ecp.business.IQueryTenderBusiness;
+import com.uxb2b.ecp.model.Ctbflbq1;
+import com.uxb2b.ecp.model.Ctbflbq2;
+import com.uxb2b.ecp.model.Ctbflbt1;
+import com.uxb2b.ecp.model.Ctbflbt2;
+import com.uxb2b.ecp.model.Enterprise;
+import com.uxb2b.ecp.model.SysCode;
+import com.uxb2b.ecp.persist.IBranchRepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbq1RepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbq2RepositoryPersist;
+import com.uxb2b.ecp.persist.ISysCodeRepositoryPersist;
+import com.uxb2b.ecp.repository.EnterpriseRepository;
+
+@Component
+public class QueryQuotesBusinessImpl implements IQueryQuotesBusiness{
+	
+	@Autowired
+	EnterpriseRepository enterpriseRepository;
+	
+	@Autowired
+	ISysCodeRepositoryPersist iSysCodeRepositoryPersist;
+	
+	@Autowired
+	ICtbflbq1RepositoryPersist iCtbflqt1RepositoryPersist;
+	
+	@Autowired
+	ICtbflbq2RepositoryPersist iCtbflqt2RepositoryPersist;
+	
+	@Autowired
+	IBranchRepositoryPersist iBranchRepositoryPersist;
+
+	@Override
+	public List<Enterprise> findAllEnterprise() {
+		
+		return enterpriseRepository.findAll();
+	}
+
+	@Override
+	public List<SysCode> findSysCodeByCodeType(String codeType) {
+		
+		return iSysCodeRepositoryPersist.findByIdCodeType(codeType);
+	}
+
+	@Override
+	public Page<Ctbflbq1> findQuotes(QueryQuotesBean quotesForm,int pageNumber,int pageSize) throws Exception {
+		
+		return iCtbflqt1RepositoryPersist.findQuotes(quotesForm, pageNumber, pageSize);
+	}
+
+	@Override
+	public Page<Ctbflbq2> findQuotesDetails(int pageNumber, int pageSize,String quationNo) {
+		
+		return iCtbflqt2RepositoryPersist.findCtbflbq2ByQuationNo(pageNumber, pageSize, quationNo);
+	}
+
+	@Override
+	public Ctbflbq1 findCtbflbq1ByQuationNo(String quationNo) {
+		
+		return iCtbflqt1RepositoryPersist.findByQuationNo(quationNo);
+	}
+
+	@Override
+	public Ctbflbq2 findCtbflbq2ByQuationNoAndItemNo(String quationNo, int itemNo) {
+		
+		return iCtbflqt2RepositoryPersist.findByIdQuationNoAndIdItemNo(quationNo, itemNo);
+	}
+
+	@Override
+	public Branch findBranchByBranchId(String branchId) {
+		
+		return iBranchRepositoryPersist.findBranchByBranchId(branchId);
+	}
+
+}

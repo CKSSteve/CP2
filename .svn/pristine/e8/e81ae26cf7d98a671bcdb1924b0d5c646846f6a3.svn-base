@@ -1,0 +1,28 @@
+package com.uxb2b.ecp.persist;
+
+import com.uxb2b.ecp.model.PassRecord;
+
+/**
+ * PASS_RECORD TABLE
+ * @author steve
+ *
+ */
+public interface IPassRecordRepositoryPersist {
+
+	/**
+	 * 取得PASS_RECORD 資料筆數
+	 * 條件:STATUS
+	 * 
+	 * @param status 傳送狀態
+	 * @return
+	 */
+	public int getCountByStatus(int status);
+
+	/**
+	 * SAVE PASS_RECORD
+	 * 
+	 * @param passRecord
+	 */
+	public void savePassRecord(PassRecord passRecord);
+
+}

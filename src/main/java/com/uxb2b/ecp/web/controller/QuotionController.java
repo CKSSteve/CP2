@@ -1,0 +1,382 @@
+package com.uxb2b.ecp.web.controller;
+
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.uxb2b.ecp.bean.UserProfileBean;
+import com.uxb2b.ecp.business.IQuotionBusiness;
+import com.uxb2b.ecp.business.IUserLogBusiness;
+import com.uxb2b.ecp.exception.CertServerException;
+import com.uxb2b.ecp.exception.RestfulException;
+import com.uxb2b.ecp.exception.SwiftException;
+import com.uxb2b.ecp.model.Ctbflbq1;
+import com.uxb2b.ecp.model.Ctbflbq2;
+import com.uxb2b.ecp.model.RejectReason;
+import com.uxb2b.ecp.model.SysCode;
+import com.uxb2b.ecp.service.SystemInfo;
+
+/**
+ * 報價作業
+ * @author steve
+ *
+ */
+
+@Controller
+@RequestMapping(value = "/quotion")
+public class QuotionController {
+
+	private Logger log = LoggerFactory.getLogger(QuotionController.class);
+
+	@Autowired
+	SystemInfo systemInfo;
+
+	@Autowired
+	IQuotionBusiness iQuotionBusiness;
+
+	@Autowired
+	IUserLogBusiness iUserLogBusiness;
+	
+	/**
+	 * 待報價清冊
+	 * 
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return quotionEntryList 待報價清單
+	 */
+
+	@RequestMapping(value = "/quotionEntryInventory")
+	public String quotionEntryInventory(Model model, 
+			@RequestParam(value = "page", defaultValue = "1") int pageNumber,
+			@RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize) {
+
+		try {
+			UserProfileBean userDetails = systemInfo.getUserProfileBean();
+			String branchId = userDetails.getBranchId();
+			int roleId = userDetails.getRoleId();
+			Page<Ctbflbq1> quotionEntryList = iQuotionBusiness.findQuotionEntry(branchId, roleId, pageNumber, pageSize);
+			model.addAttribute("quotionEntryList", quotionEntryList);
+			return "quotion/quotionEntryInventory";
+		} catch (Exception e) {
+
+			log.error("報價清冊導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "報價登錄");
+			return "common/message";
+		}
+
+		
+	}
+
+	/**
+	 * 報價登錄
+	 * 
+	 * @param tenderNo 標單號碼
+	 * @return quotionEntry 報價資料
+	 * @return ctbflbq2List 報價明細資料
+	 */
+
+	@RequestMapping(value = "/quotionEntry")
+	public String quotionEntry(Model model, @RequestParam String tenderNo) {
+		try {
+			Ctbflbq1 ctbflbq1 = iQuotionBusiness.findCtbflbq1ByTenderNo(tenderNo);
+			List<Ctbflbq2> ctbflbq2List = iQuotionBusiness.findCtbflbq2OrderByIdItemNo(ctbflbq1.getQuationNo());
+			model.addAttribute("quotionEntry", ctbflbq1);
+			model.addAttribute("ctbflbq2List", ctbflbq2List);
+
+			return "quotion/quotionEntry";
+
+		} catch (Exception e) {
+			log.error("報價登錄導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "報價登錄");
+			return "common/message";
+		}
+
+		
+	}
+	
+	/**
+	 * 檢查是否有某天期之報價金額加總>標單該天期籌資金額
+	 * @param inputquotionMoneyArrays 報價金額
+	 * @param inputDaysArrays 天期
+	 * @param tenderNo 標單號碼
+	 * @return 檢查結果
+	 */
+	
+	@RequestMapping(value = "/ajaxCheck", method = RequestMethod.POST)
+	@JsonIgnore
+    public @ResponseBody String[] ajaxCheck(@RequestParam("inputquotionMoneyArrays") String[] inputquotionMoneyArrays,@RequestParam("inputDaysArrays") String[] inputDaysArrays,@RequestParam("tenderNo") String tenderNo) {
+
+		String errorMsg;
+		String[] errorArray;
+		try {
+			Ctbflbq1 ctbflbq1 = iQuotionBusiness.findCtbflbq1ByTenderNo(tenderNo);
+			errorMsg = iQuotionBusiness.quotionEntryCheckLoanAmount(inputquotionMoneyArrays, inputDaysArrays,ctbflbq1);
+			if(StringUtils.isNotBlank(errorMsg)){
+				errorArray=errorMsg.split("、");
+			}else{
+				errorArray=null;
+			}
+		} catch (Exception e) {
+			log.error("AJAX檢查錯誤 "+e);
+			e.printStackTrace();
+			errorArray=null;
+		}
+		return errorArray;
+	}
+	
+	
+	/**
+	 * 不報價
+	 * 
+	 * @param tenderNo 標單號碼
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/doNotQuotion")
+	public String doNotQuotion(Model model, @RequestParam String tenderNo,@RequestParam String quationNo) {
+		
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+
+		String logContent;
+		String action="報價登錄-不報價";
+		try {
+			iQuotionBusiness.doNotQuotion(tenderNo,userDetails);
+			logContent="報價單號碼["+quationNo+"] 不報價成功";
+			iUserLogBusiness.quotionEntry(userId, userName, action, logContent);
+		}catch (RestfulException|CertServerException e) {
+			log.error("報價單"+tenderNo+"不報價發送電文失敗");
+			logContent="報價單號碼["+quationNo+"] 不報價成功，電文發送失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, logContent);
+		}catch (SwiftException e) {
+			log.error("報價單"+tenderNo+"不報價下行電文回傳錯誤");
+			logContent="報價單號碼["+quationNo+"] 不報價成功，電文回傳錯誤訊息";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, logContent);
+		} catch (Exception e) {
+			log.error("不報價失敗 :"+e);
+			e.printStackTrace();
+			logContent="報價單號碼["+quationNo+"] 不報價失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, logContent);;
+			logContent=SystemInfo.SYSTEM_ERROR;
+		}
+		model.addAttribute("functionName", "報價登錄");
+		model.addAttribute("message", logContent);
+		return "common/message";
+	}
+	
+	/**
+	 * 報價登錄
+	 * 
+	 * @param inputquotionMoneyArrays 報價金額
+	 * @param inputAllInArrays all in(%)
+	 * @param inputLoanTypeArrays 類別
+	 * @param inputDaysArrays 天期
+	 * @param tenderNo 標單號碼
+	 * @param maxAmount 本次可承作總金額
+	 * @param extraAmount 尚可承作總金額
+	 * @param allInRate 30天all in rate
+	 * @param extraType 額外類別
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/doQuotion")
+	public String quotionEntryPreview(Model model, @RequestParam String[] inputquotionMoneyArrays,
+			@RequestParam String[] inputAllInArrays, @RequestParam String[] inputLoanTypeArrays, @RequestParam String[] inputDaysArrays,
+			@RequestParam String tenderNo, @RequestParam String maxAmount, @RequestParam String extraAmount,
+			@RequestParam String allInRate,@RequestParam String extraType,@RequestParam String quationNo) {
+			
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		StringBuilder logContent= new StringBuilder();
+		String action="報價登錄-已報價";
+		String message;
+		try {
+			iQuotionBusiness.doQuotion(inputquotionMoneyArrays, inputAllInArrays, inputLoanTypeArrays, inputDaysArrays, tenderNo, maxAmount, extraAmount, allInRate, extraType,userDetails);
+			logContent.append("{TENDER_NO : "+tenderNo);
+			IntStream.range(0, inputquotionMoneyArrays.length).forEach(i->{
+				logContent.append(",[ITEM_NO : "+i+1);
+				logContent.append(",QUATION_AMOUNT : "+inputquotionMoneyArrays[i]);
+				logContent.append(",DAYS : "+inputDaysArrays[i]);
+				logContent.append(",LOAN_TYPE : "+inputLoanTypeArrays[i]);
+				logContent.append(",QUATION_RATE : "+inputAllInArrays[i]+"]");
+			});
+			logContent.append("}");
+			iUserLogBusiness.quotionEntry(userId, userName, action, logContent.toString());
+			message="報價單號碼["+quationNo+"] 報價成功";
+		} catch (CertServerException|RestfulException e) {
+			log.error("報價單"+quationNo+"報價登錄發送電文失敗");
+			message="報價單號碼["+quationNo+"] 報價成功，電文發送失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, message);
+		} catch (SwiftException e) {
+			log.error("報價單"+quationNo+"報價登錄下行電文回傳錯誤");
+			message="報價單號碼["+quationNo+"] 報價成功，電文回傳錯誤訊息";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, message);
+		} catch (Exception e) {
+			log.error("報價失敗 :"+e);
+			e.printStackTrace();
+			message="報價單號碼["+quationNo+"] 報價失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_ENTRY, action, message);
+			message=SystemInfo.SYSTEM_ERROR;
+		}
+		
+		model.addAttribute("functionName", "報價登錄");
+		model.addAttribute("message", message);
+		return "common/message";
+		
+	}
+	
+	/**
+	 *待審核清冊 
+	 * 
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return quotionReviewList 待審核清單
+	 */
+	
+	@RequestMapping(value = "/quotionReviewInventory")
+	public String quotionReviewInventory(Model model,
+			@RequestParam(value = "page", defaultValue = "1") int pageNumber,
+			@RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String branchId = userDetails.getBranchId();
+		int roleId = userDetails.getRoleId();
+		try {
+			Page<Ctbflbq1> quotionReviewList = iQuotionBusiness.findQuotionReview(branchId, roleId, pageNumber, pageSize);
+			model.addAttribute("quotionReviewList", quotionReviewList);
+			return "quotion/quotionReviewInventory";
+		} catch (Exception e) {
+
+			log.error("報價審核清冊導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "報價審核");
+			return "common/message";
+		}
+
+		
+	}
+	
+	/**
+	 * 報價審核
+	 * 
+	 * @param tenderNo 標單號碼
+	 * @return quotionReview 報價資料
+	 * @return ctbflbq2List 報價明細資料
+	 * @return reasonForReturnList 退回原因清單
+	 */
+	
+	@RequestMapping(value = "/quotionReview")
+	public String quotionReview(Model model, @RequestParam String tenderNo) {
+		try {
+			Ctbflbq1 ctbflbq1 = iQuotionBusiness.findCtbflbq1ByTenderNo(tenderNo);
+			List<Ctbflbq2> ctbflbq2List = iQuotionBusiness.findCtbflbq2OrderByIdItemNo(ctbflbq1.getQuationNo());
+			List<RejectReason> reasonForReturnList= iQuotionBusiness.findQuotionRejectReason();
+			model.addAttribute("quotionReview", ctbflbq1);
+			model.addAttribute("ctbflbq2List", ctbflbq2List);
+			model.addAttribute("reasonForReturnList", reasonForReturnList);
+			return "quotion/quotionReview";
+		} catch (Exception e) {
+			log.error("報價登錄導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "報價審核");
+			return "common/message";
+		}
+
+		
+	}
+	
+	/**
+	 * 審核退回
+	 * 
+	 * @param tenderNo 標單號碼
+	 * @param reasonForReturnString 退回原因
+	 * @return
+	 */
+		
+	@RequestMapping(value = "/doReturn")
+	public String doReturn(Model model, @RequestParam String tenderNo,@RequestParam String reasonForReturnString,@RequestParam String quationNo) {
+		
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		String logContent;
+		String action="報價退回";
+		try {
+			iQuotionBusiness.doReturn(tenderNo, reasonForReturnString, userDetails);
+			logContent="報價單號碼["+quationNo+"] 退回成功";
+			iUserLogBusiness.quotionReview(userId, userName, action, logContent);
+		} catch (Exception e) {
+			log.error("報價退回失敗"+e);
+			e.printStackTrace();
+			logContent="報價單號碼["+quationNo+"] 退回失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_REVIEW, action, logContent);;
+		}
+		model.addAttribute("functionName", "報價審核");
+		model.addAttribute("message", logContent);
+		return "common/message";
+	}
+	
+	/**
+	 * 審核通過
+	 * 
+	 * @param tenderNo 標單號碼
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/doReview")
+	public String doReview(Model model, @RequestParam String tenderNo,@RequestParam String quationNo) {
+		
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		String logContent;
+		String action="報價核准";
+
+		try {
+			iQuotionBusiness.doReview(tenderNo, userDetails);
+			logContent="報價單號碼["+quationNo+"] 核准成功";
+			iUserLogBusiness.quotionReview(userId, userName, action, logContent);
+		}catch (RestfulException|CertServerException e) {
+			log.error("報價單"+quationNo+"報價核准發送電文失敗");
+			logContent="報價單號碼["+quationNo+"] 核准成功，電文發送失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_REVIEW, action, logContent);
+		}catch (SwiftException e) {
+			log.error("報價單"+quationNo+"報價核准下行電文回傳錯誤");
+			logContent="報價單號碼["+quationNo+"] 核准成功，電文回傳錯誤訊息";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_REVIEW, action, logContent);
+		}catch (Exception e) {
+			log.error("報價核准失敗"+e);
+			e.printStackTrace();
+			logContent="報價單號碼["+quationNo+"] 核准失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, SystemInfo.USER_LOG_FUNCTION_ID_QUOTION_REVIEW, action, logContent);
+			logContent=SystemInfo.SYSTEM_ERROR;
+			model.addAttribute("errorMessage", e.getMessage());
+		}
+		model.addAttribute("functionName", "報價審核");
+		model.addAttribute("message", logContent);
+		return "common/message";
+	}
+	
+}

@@ -1,0 +1,135 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="tags" tagdir="/WEB-INF/tags"%>
+
+<html>
+<head>
+<c:if test="${message!=null && !empty message}">
+  <script type="text/javascript">
+  alert('<c:out value="${message}" />');
+  </script>
+  </c:if>
+  
+<script type="text/javascript" language="javascript">
+function back(){
+	$("#backForm").attr("action", '<c:url value="${method}"/>');
+	$("#backForm").submit();
+}
+
+function showBidResults(varQuationNo,varItemNo,varStatus){
+	$('input[name="quationNo"]').val(varQuationNo);
+	$('input[name="itemNo"]').val(varItemNo);
+	$('input[name="status"]').val(varStatus);
+
+    	$("#queryForm").attr("action", '<c:url value="/quotesQuery/showBidResults"/>');
+    	$("#queryForm").submit();
+}
+
+</script>
+</head>
+<body id="scroller">
+<form:form id="backForm" name="backForm" commandName="searchBean" method="POST">
+	<form:hidden path="issuerId"/>
+	<form:hidden path="currencyId"/>
+	<form:hidden path="quotesDateStartDate"/>
+	<form:hidden path="quotesDateEndDate"/>
+	<form:hidden path="statusTypeArray"/>
+	<form:hidden path="approveStatusTypeArray"/>
+</form:form>
+	<h1><span class="title-l">報價明細</span></h1>
+	<form:form id="queryForm" name="queryForm" method="POST">
+	<input id="toPage" type="hidden" name="page">
+	<input id="quationNo" type="hidden" name="quationNo">
+	<input id="itemNo" type="hidden" name="itemNo">
+	<input id="status" type="hidden" name="status">
+	<table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	  <tr>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+	    <td>
+	    <div id="htmlBody">
+	    <table width="98%" border="0" align="center" cellpadding="2" cellspacing="0" id="table01">
+	      <tr class="cell-title">
+	      	<th nowrap="nowrap">報價單號碼</th>
+	      	<th nowrap="nowrap">項次</th>
+	      	<th nowrap="nowrap">到期日</th>
+	        <th nowrap="nowrap">類別</th>
+	        <th nowrap="nowrap">天期</th>
+<!-- 	        <th nowrap="nowrap">籌資金額</th> -->
+	        <th nowrap="nowrap">報價金額</th>
+	        <th nowrap="nowrap">報價利率</th>
+	        <th nowrap="nowrap">得標金額</th>
+	        <th nowrap="nowrap">狀態</th>
+		  </tr>
+      <c:if test="${ctbflbq2List.totalElements > 0}">	     
+	      <c:forEach items="${ctbflbq2List.content }" var="item" varStatus="idx" >
+		      <tr class="<c:out value="${idx.index%2 eq 0 ? '' : 'td-lighty' }" />">
+		        <td align="center" nowrap="nowrap"><c:out value="${item.id.quationNo}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.id.itemNo}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.expiredDate}"/>&nbsp;</td>
+		        <td align="center" nowrap="nowrap"><tags:codeMap type="CTBFLBQ2_LOAN_TYPE" code="${item.loanType.trim()}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.days}"/></td>
+<%-- 		        <td align="center" nowrap="nowrap"><c:out value="${item.loanAmount}"/></td>  --%>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.quationAmount}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.quationRate}"/>&nbsp;%</td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.awardAmount}"/></td>
+		        <td align="center" nowrap="nowrap">
+		        <c:choose>
+					<c:when test="${item.status==200||item.status==290||item.status==300||item.status==190}">
+						<a href="#" onclick="showBidResults('<c:out value="${item.id.quationNo}"/>','<c:out value="${item.id.itemNo}"/>','<c:out value="${item.status}"/>')"><tags:codeMap type="CTBFLBQ2_STATUS" code="${item.status}"/></a>
+					</c:when>
+					<c:otherwise>
+						<tags:codeMap type="CTBFLBQ2_STATUS" code="${item.status}"/>
+					</c:otherwise>
+				</c:choose>
+
+		        </td>
+		      </tr>
+		  </c:forEach>
+       </c:if>
+		<c:if test="${ctbflbq2List.totalElements == 0}">
+				     <tr>
+					     <td colspan="7">
+					           <font size="3" color="red">查無資料!</font>
+					      </td>
+					 </tr>
+		</c:if>       		  
+	    </table>
+	    </div>
+	    </td>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+	  </tr>
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	</table>
+	</form:form>
+			<!-- 分頁  -->
+			<c:if test="${ctbflbq2List.totalPages > 1}">
+				<table width="98%" border="0" align="center" cellpadding="0"
+					cellspacing="0" id="table-count">
+					<tr>
+						<tags:pagination page="${ctbflbq2List}" paginationSize="5" />
+					</tr>
+				</table>
+			</c:if>
+			<!-- 分頁結束 -->
+ <table width="88%" border="0" align="left" cellpadding="0" cellspacing="0">
+  	<tr class="pbtn">
+      <td>
+       	<br/>
+  		<input name="back" type="button" class="button-brown" onClick="back();" value="回上頁">
+      </td>
+    </tr>
+  </table>
+			
+</body>
+</html>

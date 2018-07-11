@@ -1,0 +1,273 @@
+package com.uxb2b.ecp.web.controller;
+
+
+
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.uxb2b.ecp.bean.UserProfileBean;
+
+import com.uxb2b.ecp.business.IRateDetailsBusiness;
+import com.uxb2b.ecp.business.IUserLogBusiness;
+import com.uxb2b.ecp.model.AwardData;
+import com.uxb2b.ecp.model.RejectReason;
+import com.uxb2b.ecp.model.SysCode;
+import com.uxb2b.ecp.service.SystemInfo;
+
+
+/**
+ * 本票帳務明細作業
+ * @author steve
+ *
+ */
+
+@Controller
+@RequestMapping(value = "/rateDetails")
+public class RateDetailsController {
+
+	private Logger log = LoggerFactory.getLogger(RateDetailsController.class);
+
+	@Autowired
+	SystemInfo systemInfo;
+
+	@Autowired
+	IRateDetailsBusiness iRateDetailsBusiness;
+	
+	@Autowired
+	IUserLogBusiness iUserLogBusiness;
+	
+	/**
+	 * 本票利率明細登錄清冊
+	 * 
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return awardDataList 待本票帳務明細登錄清單
+	 */
+
+	@RequestMapping(value = "/rateDetailsRegisterInventory")
+	public String quotionEntryInventory(Model model, 
+			@RequestParam(value = "page", defaultValue = "1") int pageNumber,
+			@RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String branchId = userDetails.getBranchId();
+		int roleId = userDetails.getRoleId();
+		try {
+			
+			Page<AwardData> awardDataList =iRateDetailsBusiness.getRateDetailsRegisterInventory(branchId, roleId, pageNumber, pageSize);
+			model.addAttribute("awardDataList", awardDataList);
+		} catch (Exception e) {
+
+			log.error("本票利率明細登錄清冊導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", "查詢失敗");
+		}
+
+		return "rateDetails/rateDetailsRegisterInventory";
+	}
+
+
+	/**
+	 * 本票利率明細待登錄
+	 * 
+	 * @param quationNo 報價單號碼 
+	 * @param itemNo 項次序號
+	 * @return awardData 本票帳務明細待登錄資料
+	 */ 
+
+	@RequestMapping(value = "/rateDetailsRegister")
+	public String rateDetailsRegister(Model model, @RequestParam String quationNo, @RequestParam String itemNo) {
+		try {
+			
+			AwardData awardData = iRateDetailsBusiness.getRateDetails(quationNo, Integer.valueOf(itemNo));
+			model.addAttribute("awardData", awardData);
+			
+		} catch (Exception e) {
+			log.error("本票利率明細登錄導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", "查詢失敗");
+		}
+
+		return "rateDetails/rateDetailsRegister";
+	}
+	
+	/**
+	 * 本票利率明細登錄
+	 * 
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @param deliveryRate 交割服務費率
+	 * @param underwritingRate 承銷手續費率
+	 * @param visaRate 簽證費率 
+	 * @param guaranteeRate 保證費率
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/doRegister")
+	public String doRegister(Model model, @RequestParam String quationNo, @RequestParam String itemNo, @RequestParam String deliveryRate, @RequestParam String underwritingRate,@RequestParam String visaRate,@RequestParam String guaranteeRate) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		StringBuilder logContent= new StringBuilder();
+		String action="本票利率明細登錄";
+		String message;
+		try {
+			
+			iRateDetailsBusiness.doRegister(quationNo, itemNo, deliveryRate, underwritingRate, visaRate, guaranteeRate, userDetails);
+			logContent.append("{QUATION_NO : "+quationNo);
+			logContent.append(",ITEM_NO : "+itemNo);
+			logContent.append(",DELIVERY_RATE : "+deliveryRate);
+			logContent.append(",UNDERWRITING_RATE : "+underwritingRate);
+			logContent.append(",VISA_RATE : "+visaRate);
+			logContent.append(",GUARANTEE_RATE : "+guaranteeRate+"}");
+			iUserLogBusiness.SuccessLog(userId, userName, "B5", action, logContent.toString());
+			message="本票利率明細登錄成功";
+		} catch (Exception e) {
+			log.error("本票利率明細登錄失敗 :"+e);
+			e.printStackTrace();
+			message="本票利率明細登錄失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, "B5", action, message);;
+		}
+		model.addAttribute("functionName", "本票利率明細");
+		model.addAttribute("message", message);
+		return "common/message";
+	}
+	
+	
+	/**
+	 *待審核清冊 
+	 * 
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return awardDataList 待審核清單
+	 */ 
+	
+	@RequestMapping(value = "/rateDetailsReviewInventory")
+	public String rateDetailsReviewInventory(Model model,
+			@RequestParam(value = "page", defaultValue = "1") int pageNumber,
+			@RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String branchId = userDetails.getBranchId();
+		int roleId = userDetails.getRoleId();
+		try {
+			
+			Page<AwardData> awardDataList =iRateDetailsBusiness.getRateDetailsReviewInventory(branchId, roleId, pageNumber, pageSize);	
+			model.addAttribute("awardDataList",awardDataList);
+			
+		} catch (Exception e) {
+
+			log.error("本票利率明細審核清冊導入失敗:" + e);
+			e.printStackTrace();
+			model.addAttribute("message", "查詢失敗");
+		}
+
+		return "rateDetails/rateDetailsReviewInventory";
+	}
+	
+	
+	/**
+	 * 本票利率明細審核
+	 * 
+	 * @param quationNo 報價單號碼 
+	 * @param itemNo 項次序號
+	 * @return awardData 審核資料
+	 * @return reasonForReturnList 退回原因清單
+	 */
+	
+	@RequestMapping(value = "/rateDetailsReview")
+	public String quotionReview(Model model,@RequestParam String quationNo, @RequestParam String itemNo) {
+	
+			try {		
+				AwardData awardData = iRateDetailsBusiness.getRateDetails(quationNo, Integer.valueOf(itemNo));
+				List<RejectReason> reasonForReturnList= iRateDetailsBusiness.findRateDetailsRejectReason();
+				model.addAttribute("awardData", awardData);
+				model.addAttribute("reasonForReturnList", reasonForReturnList);
+			} catch (Exception e) {
+				log.error("本票利率明細登錄導入失敗:" + e);
+				e.printStackTrace();
+				model.addAttribute("message", "查詢失敗");
+			}
+
+
+		return "rateDetails/rateDetailsReview";
+	}
+	
+	
+	/**
+	 * 審核退回
+	 * 
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @param reasonForReturnString 退回原因
+	 * @return
+	 */
+		
+	@RequestMapping(value = "/doReturn")
+	public String doReturn(Model model, @RequestParam String quationNo, @RequestParam String itemNo,@RequestParam String reasonForReturnString) {
+		
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		String logContent;
+		String action="本票利率明細退回";
+		String message;
+		try {
+			iRateDetailsBusiness.doReturn(quationNo,itemNo,reasonForReturnString, userDetails);
+			logContent="報價單號碼["+quationNo+"] 項次序號["+itemNo+"]退回成功";
+			iUserLogBusiness.SuccessLog(userId, userName, "B5", action, logContent.toString());
+			message="本票利率明細退回成功";
+		} catch (Exception e) {
+			log.error("本票利率明細退回失敗"+e);
+			e.printStackTrace();
+			logContent="報價單號碼["+quationNo+"] 項次序號["+itemNo+"]退回失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, "B5", action, logContent);
+			message="本票利率明細退回失敗";
+		}
+		model.addAttribute("functionName", "本票利率明細審核");
+		model.addAttribute("message", message);
+		return "common/message";
+	}
+	
+	/**
+	 * 審核通過 
+	 * 
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/doReview")
+	public String doReview(Model model, @RequestParam String quationNo, @RequestParam String itemNo) {
+		
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		String userName = userDetails.getViewUserName();
+		String logContent;
+		String action="本票利率明細核准";
+		String message;
+		try {
+			iRateDetailsBusiness.doReview(quationNo,itemNo, userDetails);
+			logContent="報價單號碼["+quationNo+"] 項次序號["+itemNo+"]核准成功";
+			iUserLogBusiness.SuccessLog(userId, userName, "B5", action, logContent);
+			message="本票利率明細核准成功";
+		} catch (Exception e) {
+			log.error("本票利率明細核准失敗"+e);
+			e.printStackTrace();
+			logContent="報價單號碼["+quationNo+"] 項次序號["+itemNo+"]核准失敗";
+			iUserLogBusiness.ErrorLog(userId, userName, "B5", action, logContent);
+			message="本票利率明細核准失敗";
+		}
+		model.addAttribute("functionName", "本票利率明細");
+		model.addAttribute("message", message);
+		return "common/message";
+	}
+	
+}

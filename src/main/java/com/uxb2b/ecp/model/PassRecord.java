@@ -1,0 +1,144 @@
+package com.uxb2b.ecp.model;
+
+import java.io.Serializable;
+import javax.persistence.*;
+import java.sql.Timestamp;
+
+
+/**
+ * The persistent class for the PASS_RECORD database table.
+ * 
+ */
+@Entity
+@Table(name="PASS_RECORD")
+@NamedQuery(name="PassRecord.findAll", query="SELECT p FROM PassRecord p")
+public class PassRecord implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="RECORD_ID")
+	private long recordId;
+
+	@Column(name="TRANSACTION_NO")
+	private String transactionNo;
+	
+	@Column(name="TX_ID")
+	private String txId;
+
+	@Column(name="TRANSACTION_DATE")
+	private Timestamp transactionDate;
+	
+	@Column(name="PASS_TIME")
+	private Timestamp passTime;
+	
+	@Column(name="STATUS")
+	private String status;
+
+	@Column(name="RE_SEND_TIMES")
+	private String reSendTimes;
+
+	@Column(name="RE_SEND_REASON")
+	private String reSendReason;
+	
+	@Column(name="CONTENT")
+	private String content;
+
+	@Column(name="BRANCH_ID")
+	private String branchId;
+	
+	@Column(name="ISSUER_ID")
+	private String issuerId;
+	
+	public PassRecord() {
+	}
+
+	public long getRecordId() {
+		return this.recordId;
+	}
+
+	public void setRecordId(long recordId) {
+		this.recordId = recordId;
+	}
+
+	public Timestamp getPassTime() {
+		return this.passTime;
+	}
+
+	public void setPassTime(Timestamp passTime) {
+		this.passTime = passTime;
+	}
+
+	public String getReSendReason() {
+		return this.reSendReason;
+	}
+
+	public void setReSendReason(String reSendReason) {
+		this.reSendReason = reSendReason;
+	}
+
+	public String getReSendTimes() {
+		return this.reSendTimes;
+	}
+
+	public void setReSendTimes(String reSendTimes) {
+		this.reSendTimes = reSendTimes;
+	}
+
+	public String getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public Timestamp getTransactionDate() {
+		return this.transactionDate;
+	}
+
+	public void setTransactionDate(Timestamp transactionDate) {
+		this.transactionDate = transactionDate;
+	}
+
+	public String getTransactionNo() {
+		return this.transactionNo;
+	}
+
+	public void setTransactionNo(String transactionNo) {
+		this.transactionNo = transactionNo;
+	}
+
+	public String getTxId() {
+		return this.txId;
+	}
+
+	public void setTxId(String txId) {
+		this.txId = txId;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getBranchId() {
+		return branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	public String getIssuerId() {
+		return issuerId;
+	}
+
+	public void setIssuerId(String issuerId) {
+		this.issuerId = issuerId;
+	}
+
+}

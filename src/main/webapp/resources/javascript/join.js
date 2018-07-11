@@ -1,0 +1,260 @@
+/**
+*  呼叫日期小幫手
+*/
+function calender(objDate)  {
+   var val;
+
+   val = window.showModalDialog("../common/calendar.html","","dialogwidth=150pt;dialogheight=170pt;status=no;help=no;");
+   if (val  != -1 && val  != null) {
+      objDate.value = val;
+   }
+}
+
+function calendar_enii(objDate) {
+  var val;
+  val = window.showModalDialog("common/calendar.html","","dialogwidth=150pt;dialogheight=170pt;status=no;help=no;");
+  if (val  != -1 && val  != null) {
+    objDate.value = val;
+  }
+}
+
+function calendar_enii_ad(objDate) {
+	  var val;
+	  val = window.showModalDialog("common/calendar.html","","dialogwidth=150pt;dialogheight=170pt;status=no;help=no;");
+	  if (val  != -1 && val  != null) {
+	    objDate.value = formateInputDate(val);
+	  }
+	}
+
+function formateInputDate(obj) {
+	return Date.parse(obj).toString("yyyy.MM.dd");
+}
+
+function showDay(obj) {
+	obj.value = Date.today().toString("yyyy.MM.dd");
+}
+
+function calendar_clean(objDate) {
+	objDate.value = "";
+}
+
+function swiftDate(objDate)  {
+   var val;
+   var sYear;
+   var sMonth;
+   var sDay;
+   var str;
+   val = window.showModalDialog("common/calendar.html","","dialogwidth=150pt;dialogheight=170pt;status=no;help=no;");
+   if (val  != -1 && val  != null) {
+   	  str=val.split(".");
+   	  sYear = str[0].substr(2);
+   	  sMonth = "0" + str[1];
+   	  sMonth = sMonth.substr(sMonth.length-2);
+   	  sDay = "0" + str[2];
+   	  sDay = sDay.substr(sDay.length-2);
+
+      objDate.value = sYear + sMonth + sDay;
+   }
+}
+
+/**
+ * checkbox全部取消或選取的功能 , obj 為Tag object name
+ */
+function checkAll(obj) {
+  var event = window.event ||arguments.callee.caller.arguments[0];
+  var isChecked = (event.srcElement||event.target).checked;
+  var serial = document.getElementsByName(obj);
+  for(var i=0;i<serial.length;i++) {
+    if(!serial[i].disabled) {
+      serial[i].checked = isChecked;
+    }
+  }
+}
+
+/**
+ * checkbox全部取消或選取的功能 , obj 為Tag object id name
+ */
+function checkRoot(obj) {
+  var event = window.event ||arguments.callee.caller.arguments[0];;
+  var isSelect = (event.srcElement||event.target).checked;
+  var serial = document.getElementsByName(obj);
+  var count = 0 ;
+  for(var i=0;i<serial.length;i++) {
+    if(serial[i].checked) {
+      count++;
+    }
+  }
+
+  var rootCheck = document.getElementById(obj);
+  if(!isSelect && count==1){
+    rootCheck.checked = isSelect;
+  }else if(isSelect && count==1){
+    rootCheck.checked = isSelect;
+  }
+}
+
+/**
+ * checkbox是否有被選取的動作 , 至少要被選取一個以上
+ * 回傳 : true 被選取 | false 都沒有選取
+ */
+function checkSelect(obj){
+  var isSelect = false;
+  var event = window.event ||arguments.callee.caller.arguments[0];;
+  var isChecked = (event.srcElement||event.target).checked;
+  var serial = document.getElementsByName(obj);
+  for(var i=0;i<serial.length;i++) {
+    if(serial[i].checked) {
+       isSelect  = true;
+       break;
+    }
+  }
+  return isSelect;
+}
+/**
+ * 檢核純數字欄位 , 不能包含字母
+ * true :純數字
+ */
+function checkNumeric(obj){
+  var pattern=/^\d*$/
+   return pattern.test(obj);
+}
+
+/**
+ * 檢核浮點數欄位 , 不能包含字母
+ * true :純數字
+ */
+function checkFloatNumeric(obj){
+  //var pattern=/^\d*.\d*$/
+   var pattern=/^\d+(\.\d+)?$/
+   return pattern.test(obj);
+}
+/**
+ * email 檢查
+ * 符合條件 : username@domain.com  ; u-s_e.r1@s-ub2.domain-name.museum:8080 ; user_name@123.123.123.12
+ */
+function checkEmail(obj){
+  var pattern = /^[\w-]+(\.[\w-]+)*@([a-z0-9-]+(\.[a-z0-9-]+)*?\.[a-z]{2,6}|(\d{1,3}\.){3}\d{1,3})(:\d{4})?$/
+ return pattern.test(obj);
+}
+
+/**
+* 控制加簽狀態
+**/
+var pass = true;
+/**
+* 是否需要主管放行
+**/
+var system_parameter = true;
+/**
+* jquery 呼叫
+* 1: struts action 完整路徑
+* 2: jquery執行結果回傳接收的javascript function name
+**/
+function jquery(action,method){
+  $.ajax({
+   url: action,
+   cache: false,
+   dataType: "json",
+   type:"POST",
+   data: $("form").serialize(),
+   success: function(result) {
+    method(result);
+   },
+   error:function (request, ajaxOptions, thrownError){
+    alert(request.responseText);
+    pass=false;
+   },
+   async: false
+  });
+ }
+
+/**
+* 參數說明:
+* 1 : 對應DigestSignatureAction 呼叫的 mehtod name ,請使用form 的名稱方便對應撰寫
+* 2 : SystemParameter -> parameterId : 2,3,4,5,6,EP1,EP2,EP3,EP4,EP5,EP6
+* 3 : PassType -> LC_AMEND,LC_APPLY,LC_BILL_ARRIVAL,LC_BILL_ARRIVAL_NOTIFY,LC_REVOKE
+*              -> LC_NOTIFY_MT700,LC_NOTIFY_MT707,LC_NOTIFY_MT799,NEGO_DISCREPANCIES,NEGO_SETTLEMENT,NEGO_WRITEOFF
+* 4. lcNoGP  -> 信用狀號碼以逗點隔開 : AAA123,BBB123,...
+* 5. draftNoGP -> 匯票號碼以逗點隔開 : AAA567,BBB789,....
+* 6. 判斷目前作業方式 -> true : 繕製作業(需執行檢核主管放行function) | false: 放行作業(不需執行檢核主管放行function)
+* 7 : 最後執行送出mehtod name --> ex : saveConfirm 為呼叫jquery後, 最後將控制權交給function saveConfirm(result)
+*
+* 執行動作
+* 1.檢核User 是否被指定使用憑證及放行類別
+* 2.取得加簽明文result , 並將值設定給hidden欄位
+* 3.檢核是否需要主管放行
+* 4.檢核使用者憑證是否可執行加簽功能
+* 5.加簽結果寫回form.signature hidden欄位
+* 6.執行指定excuteMethod
+*/
+function passCASignature(methodName,paramerId,passType,lcNoGP,draftNoGP ,editOrPass ,excuteMethod){
+  //檢核User 是否被指定使用憑證
+  jquery("digest!authPassCAUser.action?passType="+passType,assignDigest);
+
+  // assign 加簽明文指派給digest欄位
+  if(pass){
+    jquery("digest!"+methodName+".action"+"?lcNoGP="+lcNoGP+"&draftNoGP="+draftNoGP,assignDigest);
+  }
+
+  // 系統參數設定是否為主管放行,並且為繕製作業
+  if(editOrPass){
+    if(pass){
+      jquery("digest!checkSystemParameter.action?parameterId="+paramerId+"&lcNoGP="+lcNoGP+"&draftNoGP="+draftNoGP,checkAuthSignUser);
+    }
+
+    //使用者憑證是否有指派給user
+    //執行驗證使用者和憑證序號比對
+    //不需主管放行加密結果寫入CA Log
+    if(pass && system_parameter){
+      jquery("digest!authSignUser.action?passType="+passType+"&lcNoGP="+lcNoGP+"&draftNoGP="+draftNoGP,excuteMethod);
+    }else if(pass && !system_parameter){
+      //需主管放行
+      excuteMethod(null);
+    }
+  }else{
+    //執行放行作業
+    if(pass){
+      jquery("digest!checkSystemParameter.action?parameterId="+paramerId+"&lcNoGP="+lcNoGP+"&draftNoGP="+draftNoGP,signPassRecord);
+    }
+    //使用者憑證是否有指派給user
+    //執行驗證使用者和憑證序號比對
+    //放行加密結果寫入CA Log
+    if(pass){
+      jquery("digest!authSignUser.action?passType="+passType+"&lcNoGP="+lcNoGP+"&draftNoGP="+draftNoGP,excuteMethod);
+    }
+  }
+
+  // 恢復狀態
+  pass = true;
+
+}
+
+/**
+ * 指派明文給digest欄位
+ */
+function assignDigest(result){
+  // assign 加簽明文指派給digest欄位
+  window.document.forms[0].digest.value=result.digest;
+}
+/**
+ * 是否需要主管放行
+ */
+function checkAuthSignUser(result){
+  //如果不需主管放行時 , 則需要使用加簽動作 , 反之則免加簽動作
+  // 0 : 不需要放行 | 1 :需要主管放行
+  system_parameter = result.digest=="0" ? true : false;
+  if(system_parameter && !sign()){
+      pass=false;
+  }
+}
+/**
+ * 放行作業
+ */
+function signPassRecord(result){
+  if(!sign()){
+     pass=false;
+  }
+}
+
+
+

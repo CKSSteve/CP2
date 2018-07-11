@@ -1,0 +1,32 @@
+package com.uxb2b.ecp.persist.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.uxb2b.ecp.model.PassRecord;
+import com.uxb2b.ecp.persist.IPassRecordRepositoryPersist;
+import com.uxb2b.ecp.repository.PassRecordRepository;
+
+
+
+@Repository
+@Transactional
+public class PassRecordRepositoryPersistImpl implements IPassRecordRepositoryPersist{
+
+	@Autowired
+	PassRecordRepository passRecordRepository;
+	
+	@Override
+	public int getCountByStatus(int status) {
+		
+		return passRecordRepository.countByStatus(status);
+	}
+
+	@Override
+	@Transactional(readOnly=false, rollbackFor=Exception.class)
+	public void savePassRecord(PassRecord passRecord) {
+		passRecordRepository.save(passRecord);
+	}
+
+}

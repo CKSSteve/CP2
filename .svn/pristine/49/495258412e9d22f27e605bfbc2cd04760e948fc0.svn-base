@@ -1,0 +1,202 @@
+package com.uxb2b.ecp.business.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.uxb2b.ecp.bean.UserProfileBean;
+import com.uxb2b.ecp.business.IAwardDataRegisterBusiness;
+import com.uxb2b.ecp.business.IAwardDataVerifyBusiness;
+import com.uxb2b.ecp.model.AwardData;
+import com.uxb2b.ecp.model.Enterprise;
+import com.uxb2b.ecp.model.MessageInbox;
+import com.uxb2b.ecp.model.PassRecord;
+import com.uxb2b.ecp.persist.IAwardDataRepositoryPersist;
+import com.uxb2b.ecp.persist.IEnterpriseRepositoryPersist;
+import com.uxb2b.ecp.persist.IFlowStepRepositoryPersist;
+import com.uxb2b.ecp.persist.IJsonMessagePersist;
+import com.uxb2b.ecp.persist.IMessageInboxRepositoryPersist;
+import com.uxb2b.ecp.persist.IPassRecordRepositoryPersist;
+import com.uxb2b.ecp.persist.ISendMessagePersist;
+import com.uxb2b.ecp.repository.AwardDataRepository;
+import com.uxb2b.ecp.service.DateConvertService;
+import com.uxb2b.ecp.service.SystemInfo;
+
+@Component
+public class AwardDataVerifyBusinessImpl implements IAwardDataVerifyBusiness{
+	
+	private Logger log = LoggerFactory.getLogger(AwardDataVerifyBusinessImpl.class);
+	
+	@Autowired
+	private SystemInfo systemInfo;
+	
+	@Autowired
+	private DateConvertService dateConvertService;
+	
+	@Autowired
+	AwardDataRepository awardDataRepository;
+	
+	@Autowired
+	IFlowStepRepositoryPersist iFlowStepRepositoryPersist;
+	
+	@Autowired
+	IMessageInboxRepositoryPersist iMessageInboxRepositoryPersist;
+
+	@Autowired
+	IAwardDataRepositoryPersist iAwardDataRepositoryPersist;
+	
+	@Autowired
+	IPassRecordRepositoryPersist iPassRecordRepositoryPersist;
+	
+	@Autowired
+	IJsonMessagePersist iJsonMessagePersist;
+	
+	@Autowired
+	IEnterpriseRepositoryPersist iEnterpriseRepositoryPersist;
+	
+	@Autowired
+	ISendMessagePersist iSendMessagePersist;
+	
+	@Override
+	public Page<AwardData> findbyAwardDataList(int pageNumber, int pageSize) throws Exception {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		
+		List<String> approveStatusList = Arrays.asList("2","3");
+		Pageable pageable = new PageRequest(pageNumber-1,pageSize, new Sort(Sort.Direction.ASC, "id.quationNo","id.itemNo"));
+		Page<AwardData> awardDataList  = awardDataRepository.findByBranchIdAndRoleId1AndApproveStatus1In(userDetails.getBranchId(), userDetails.getRoleId(), approveStatusList, pageable);	
+		
+		return awardDataList;
+	}
+
+	@Override
+	public AwardData findByQuationNoAndItemNo(String quationNo, String itemNo) throws Exception {
+		return awardDataRepository.findByIdQuationNoAndIdItemNo(quationNo, Integer.parseInt(itemNo));
+	}
+
+	@Override
+	public AwardData updateAwardData(String quationNo, String itemNo) throws Exception {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		// (1)	UPDATE AWARD_DATA
+		AwardData awardData = awardDataRepository.findByIdQuationNoAndIdItemNo(quationNo, Integer.parseInt(itemNo));
+		int maxStepNo = iFlowStepRepositoryPersist.getMaxStepNoByFlowId(awardData.getFlowId1());
+		Boolean sendSwift = false;
+		
+		if("Y".equalsIgnoreCase(awardData.getFinalStep1())){
+			sendSwift = true;
+			awardData.setApproveStatus1("4");
+		}else{
+//			(1)SELECT MAX(STEP_NO) FROM FLOW_STEP WHERE FLOW_ID=AWARD_DATA.FLOW_ID1
+//			若AWARD_DATA.STEP_NO1+1=(1)查詢結果 THEN APPROVE_STATUS1=3
+//			ELSE APPROVE_STATUS1=2
+			if(maxStepNo == (awardData.getStepNo1()+1)){
+				awardData.setApproveStatus1("3");
+			}else{
+				awardData.setApproveStatus1("2");
+			}
+		}
+		if("N".equalsIgnoreCase(awardData.getFinalStep1())){
+			awardData.setStepNo1(awardData.getStepNo1()+1);
+//			(2)SELECT ROLE_ID FROM FLOW_STEP WHERE FLOW_ID=AWARD_DATA.FLOW_ID1 AND STEP_NO=AWARD_DATA.STEP_NO1+1
+			int roleId = iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(awardData.getFlowId1(), awardData.getStepNo1());
+			awardData.setRoleId1(roleId);
+		}
+		if("N".equalsIgnoreCase(awardData.getFinalStep1()) && (maxStepNo == awardData.getStepNo1())){
+			awardData.setFinalStep1("Y");
+		}		
+		awardData.setLastModifyTime1(dateConvertService.DateToTimestamp(new Date()));
+		awardData.setLastModifyUser1(userDetails.getUsername());
+		awardData.setReplyTime1(dateConvertService.DateToTimestamp(new Date()));
+		
+		iAwardDataRepositoryPersist.saveAwardData(awardData);
+		
+		// (3)	INSERT MESSAGE_INBOX
+		MessageInbox messageInbox = new MessageInbox();
+		messageInbox.setBranchId(userDetails.getBranchId());
+		messageInbox.setSender(userDetails.getViewUserName());
+		if("Y".equals(awardData.getFinalStep1())){
+			messageInbox.setReceiverRole(Integer.parseInt("0"));
+			messageInbox.setSubject("得標已同意");
+		}else{
+			messageInbox.setReceiverRole(awardData.getRoleId1());
+			messageInbox.setSubject("得標確認待審核");
+		}
+		messageInbox.setContent("報價單號碼:"+awardData.getId().getQuationNo()+",回覆日期:"+awardData.getReplyTime1());
+		messageInbox.setMessageTime(dateConvertService.DateToTimestamp(new Date()));
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+		
+		// (4)	若AWARD_DATA.FINAL_STEP1=Y:
+		if(sendSwift){
+			//i.	產生報價 request電文內容(參考CP2平台與票券商S2S介面規格)
+			String json = iJsonMessagePersist.makeT03Message(awardData, userDetails, "verify");
+			String wsUrl = iEnterpriseRepositoryPersist.findByUni(awardData.getIssuerId()).getWsUrl();
+			//ii.	INSERT PASS_RECORD
+			PassRecord passRecord = new PassRecord();
+			passRecord.setTransactionNo(awardData.getIssuerId());
+			passRecord.setTxId(SystemInfo.TXID_AWARDDATA);
+			passRecord.setTransactionDate(awardData.getReplyTime1());
+			passRecord.setReSendTimes(0);
+			passRecord.setContent(json);//電文內容
+			passRecord.setBranchId(awardData.getBranchId());
+			passRecord.setIssuerId(awardData.getIssuerId());
+			try{
+				String responseString =iSendMessagePersist.sendMessage(wsUrl+SystemInfo.TXID_AWARDDATA, json, SystemInfo.TXID_AWARDDATA);
+				passRecord.setStatus(3);
+			}catch(Exception e){
+				passRecord.setStatus(2);
+				passRecord.setReSendReason(e.getMessage());
+			}
+			
+			iPassRecordRepositoryPersist.savePassRecord(passRecord);
+			
+			//iii.	UPDATE AWARD_DATA.STATUS=’300’
+			awardData.setStatus("300");
+			iAwardDataRepositoryPersist.saveAwardData(awardData);
+		}
+		
+		
+		
+		return awardData;
+	}
+
+	@Override
+	public AwardData updateAwardData(String quationNo, String itemNo, String rejectReason1) throws Exception {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		// (1)	UPDATE AWARD_DATA
+		AwardData awardData = awardDataRepository.findByIdQuationNoAndIdItemNo(quationNo, Integer.parseInt(itemNo));
+		awardData.setApproveStatus1("1");
+		awardData.setStepNo1(1);
+		//SELECT ROLE_ID FROM FLOW_STEP WHERE FLOW_ID=AWARD_DATA.FLOW_ID1 AND STEP_NO1=1
+		int roleId1 = iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(awardData.getFlowId1(), awardData.getStepNo1());
+		awardData.setRoleId1(roleId1);
+		awardData.setFinalStep1("N");
+		awardData.setRejectReason1(rejectReason1);		
+		awardData.setLastModifyTime1(dateConvertService.DateToTimestamp(new Date()));
+		awardData.setLastModifyUser1(userDetails.getUsername());
+		awardData.setReplyTime1(dateConvertService.DateToTimestamp(new Date()));
+
+		iAwardDataRepositoryPersist.saveAwardData(awardData);
+		
+		// (3)	INSERT MESSAGE_INBOX
+		MessageInbox messageInbox = new MessageInbox();
+		messageInbox.setBranchId(userDetails.getBranchId());
+		messageInbox.setSender(userDetails.getViewUserName());
+		messageInbox.setReceiverRole(awardData.getRoleId1());
+		messageInbox.setSubject("票券批號登錄(得標確認)退回");
+		messageInbox.setContent("報價單號碼:"+awardData.getId().getQuationNo()+",退回原因:"+awardData.getRejectReason1());
+		messageInbox.setMessageTime(dateConvertService.DateToTimestamp(new Date()));
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+		
+		return awardData;
+	}
+
+}

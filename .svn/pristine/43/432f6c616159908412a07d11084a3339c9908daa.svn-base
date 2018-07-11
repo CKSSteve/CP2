@@ -1,0 +1,546 @@
+package com.uxb2b.ecp.business.impl;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.Gson;
+import com.uxb2b.ecp.bean.QueryQuotesBean;
+import com.uxb2b.ecp.bean.UserProfileBean;
+import com.uxb2b.ecp.bean.swift.T01RsBean;
+import com.uxb2b.ecp.model.Branch;
+import com.uxb2b.ecp.business.IQuotionBusiness;
+import com.uxb2b.ecp.model.Ctbflbq1;
+import com.uxb2b.ecp.model.Ctbflbq2;
+import com.uxb2b.ecp.model.Ctbflbq2PK;
+import com.uxb2b.ecp.model.Ctbflbt1;
+import com.uxb2b.ecp.model.Enterprise;
+import com.uxb2b.ecp.model.MessageInbox;
+import com.uxb2b.ecp.model.PassRecord;
+import com.uxb2b.ecp.model.RejectReason;
+import com.uxb2b.ecp.model.SysCode;
+import com.uxb2b.ecp.persist.IBranchRepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbq1RepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbq2RepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbt1RepositoryPersist;
+import com.uxb2b.ecp.persist.ICtbflbt2RepositoryPersist;
+import com.uxb2b.ecp.persist.IFlowStepRepositoryPersist;
+import com.uxb2b.ecp.persist.IJsonMessagePersist;
+import com.uxb2b.ecp.persist.IMessageInboxRepositoryPersist;
+import com.uxb2b.ecp.persist.IPassRecordRepositoryPersist;
+import com.uxb2b.ecp.persist.ISendMessagePersist;
+import com.uxb2b.ecp.persist.ISysCodeRepositoryPersist;
+import com.uxb2b.ecp.repository.EnterpriseRepository;
+import com.uxb2b.ecp.repository.RejectReasonRepository;
+import com.uxb2b.ecp.service.SystemInfo;
+
+
+
+@Component
+public class QuotionBusinessImpl implements IQuotionBusiness{
+	
+	private Logger log = LoggerFactory.getLogger(QuotionBusinessImpl.class);
+	
+	@Autowired
+	SystemInfo systemInfo;
+	
+	@Autowired
+	EnterpriseRepository enterpriseRepository;
+	
+	@Autowired
+	ISysCodeRepositoryPersist iSysCodeRepositoryPersist;
+	
+	@Autowired
+	ICtbflbq1RepositoryPersist iCtbflbq1RepositoryPersist;
+	
+	@Autowired
+	ICtbflbq2RepositoryPersist iCtbflbq2RepositoryPersist;
+	
+	@Autowired
+	IBranchRepositoryPersist iBranchRepositoryPersist;
+	
+	@Autowired
+	ICtbflbt1RepositoryPersist iCtbflbt1RepositoryPersist;
+	
+	@Autowired
+	ICtbflbt2RepositoryPersist iCtbflbt2RepositoryPersist;
+
+	@Autowired
+	IMessageInboxRepositoryPersist iMessageInboxRepositoryPersist;
+	
+	@Autowired
+	IFlowStepRepositoryPersist iFlowStepRepositoryPersist;
+	
+	@Autowired
+	IJsonMessagePersist iJsonMessagePersist;
+	
+	@Autowired
+	IPassRecordRepositoryPersist iPassRecordRepositoryPersist;
+	
+	@Autowired
+	ISendMessagePersist iSendMessagePersist;
+	
+	@Autowired
+	RejectReasonRepository rejectReasonRepository;
+	
+	@Override
+	public List<Enterprise> findAllEnterprise() {
+		
+		return enterpriseRepository.findAll();
+	}
+
+	@Override
+	public List<SysCode> findSysCodeByCodeType(String codeType) {
+		
+		return iSysCodeRepositoryPersist.findByIdCodeType(codeType);
+	}
+	
+	@Override
+	public List<RejectReason> findQuotionRejectReason() {
+		
+		return rejectReasonRepository.findByIdCodeTypeAndStatusOrderByIdCodeKeyAsc(SystemInfo.REJECT_REASON_CODE_TYPE_QUOTION, SystemInfo.REJECT_REASON_STATUS_ON);
+	}
+
+	@Override
+	public Page<Ctbflbq1> findQuotes(QueryQuotesBean quotesForm,int pageNumber,int pageSize) throws Exception {
+		
+		return iCtbflbq1RepositoryPersist.findQuotes(quotesForm, pageNumber, pageSize);
+	}
+
+	@Override
+	public Page<Ctbflbq2> findQuotesDetails(int pageNumber, int pageSize) {
+		
+		return iCtbflbq2RepositoryPersist.findCtbflbq2(pageNumber, pageSize);
+	}
+
+	@Override
+	public Ctbflbq1 findCtbflbq1ByQuationNo(String quationNo) {
+		
+		return iCtbflbq1RepositoryPersist.findByQuationNo(quationNo);
+	}
+
+	@Override
+	public Ctbflbq2 findCtbflbq2ByQuationNoAndItemNo(String quationNo, int itemNo) {
+		
+		return iCtbflbq2RepositoryPersist.findByIdQuationNoAndIdItemNo(quationNo, itemNo);
+	}
+
+	@Override
+	public Branch findBranchByBranchId(String branchId) {
+		
+		return iBranchRepositoryPersist.findBranchByBranchId(branchId);
+	}
+
+	@Override
+	public Page<Ctbflbq1> findQuotionEntry(String branchId, int roleId,int pageNumber, int pageSize) {
+
+		List<String> ApproveStatusList=new ArrayList<>();
+		ApproveStatusList.add("0");
+		ApproveStatusList.add("1");
+		return iCtbflbq1RepositoryPersist.findByBranchIdAndRoleIdAndApproveStatus(branchId, roleId, ApproveStatusList, pageNumber, pageSize);
+	}
+
+	@Override
+	public Ctbflbq1 findCtbflbq1ByTenderNo(String tenderNo) {
+		
+		return iCtbflbq1RepositoryPersist.findCtbflbq1ByTenderNo(tenderNo);
+	}
+
+	@Override
+	public String quotionEntryCheckLoanAmount(String[] inputquotionMoneyArrays, String[] inputDaysArrays,
+			Ctbflbq1 ctbflbq1) {
+		
+		Map<Integer,BigDecimal> checkMap =new HashMap();
+
+		StringBuilder errorMsg=new StringBuilder();
+		IntStream.range(0, inputquotionMoneyArrays.length).forEach(i->{
+			if(checkMap.get(Integer.valueOf(inputDaysArrays[i]))!=null){
+				checkMap.put(Integer.valueOf(inputDaysArrays[i]), checkMap.get(Integer.valueOf(inputDaysArrays[i])).add(new BigDecimal(inputquotionMoneyArrays[i])));
+			}else{
+				checkMap.put(Integer.valueOf(inputDaysArrays[i]), new BigDecimal(inputquotionMoneyArrays[i]));				  
+			}
+		});
+			
+		ctbflbq1.getCtbflbt1().getCtbflbt2().forEach(action->{
+			if(checkMap.get(action.getDays())!=null){
+				if(action.getLoanAmount().compareTo(checkMap.get(action.getDays()))==-1){
+					errorMsg.append("["+action.getDays()+"] "); 			 
+				}
+			}
+		 });
+			
+		return errorMsg.toString();
+	}
+
+	@Override
+	@Transactional(readOnly=false, rollbackFor=Exception.class)
+	public void doNotQuotion(String tenderNo,UserProfileBean userDetails) throws Exception {
+		
+
+		Ctbflbt1 ctbflbt1= iCtbflbt1RepositoryPersist.findByTenderNo(tenderNo);
+		Ctbflbq1 ctbflbq1= iCtbflbq1RepositoryPersist.findCtbflbq1ByTenderNo(tenderNo);
+		String finalStep=ctbflbq1.getFinalStep();
+		
+		//UPDATE CTBFLBT1
+		ctbflbt1.setStatus("090");
+		iCtbflbt1RepositoryPersist.saveCtbflbt1(ctbflbt1);
+		
+		//UPDATE CTBFLBQ1
+		ctbflbq1.setStatus("090");
+		Timestamp nowTime= new Timestamp(new Date().getTime());
+		int nextRoleId = 0;
+		if("Y".equals(finalStep)){
+			ctbflbq1.setApproveStatus("4");
+		}else if("N".equals(finalStep)){
+			int maxStepNo=iFlowStepRepositoryPersist.getMaxStepNoByFlowId(ctbflbq1.getFlowId());
+			nextRoleId=iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(ctbflbq1.getFlowId(), ctbflbq1.getStepNo()+1);
+			if((ctbflbq1.getStepNo()+1)==maxStepNo){
+				ctbflbq1.setApproveStatus("3");
+				ctbflbq1.setFinalStep("Y");
+			}else{
+				ctbflbq1.setApproveStatus("2");
+			}
+			
+			ctbflbq1.setStepNo(ctbflbq1.getStepNo()+1);
+			ctbflbq1.setRoleId(nextRoleId);	
+		}
+			ctbflbq1.setLastModifyTime(nowTime);
+			ctbflbq1.setLastModifyUser(userDetails.getUsername()+":"+userDetails.getViewUserName());
+			ctbflbq1.setQuationTime(nowTime);
+			ctbflbq1.setQuationMethod("A");	
+			iCtbflbq1RepositoryPersist.saveCtbflbq1(ctbflbq1);
+		
+		//SAVE MESSAGE_INBOX
+		String content="報價號碼:"+ctbflbq1.getQuationNo()+",報價日期"+nowTime;
+		int receiverRole = 0;
+		String subject = null;
+		if("Y".equals(finalStep)){
+			receiverRole=0;
+			subject="報價單已送出";
+		}else if("N".equals(finalStep)){
+			receiverRole=nextRoleId;
+			subject="報價單待審核";
+		}
+		MessageInbox messageInbox =new MessageInbox(userDetails.getBranchId(), content, new Timestamp(new Date().getTime()), receiverRole, userDetails.getUsername(), subject);
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+		
+		
+		if("Y".equals(finalStep)){
+			//產生報價 request電文內容
+			log.info("不報價-發送電文");
+			//組成JSON
+			String t02Json=iJsonMessagePersist.makeT02Message(ctbflbq1, null, userDetails);
+			log.info("T02上行電文 :"+t02Json);
+			
+			PassRecord passRecord = new PassRecord();
+			passRecord.setTransactionNo(ctbflbq1.getQuationNo());
+			passRecord.setTxId(SystemInfo.TXIDQUATION);
+			passRecord.setTransactionDate(ctbflbq1.getQuationTime());
+			passRecord.setContent(t02Json);
+			passRecord.setBranchId(ctbflbq1.getBranchId());
+			passRecord.setIssuerId(ctbflbq1.getIssuerId());
+			passRecord.setReSendTimes(0);
+			
+			String url =enterpriseRepository.findByUni(ctbflbq1.getIssuerId()).getWsUrl();
+			
+			try{
+				
+				
+				String responseString =iSendMessagePersist.sendMessage(url+SystemInfo.TXIDQUATION, t02Json, SystemInfo.TXIDQUATION);
+				log.info("T02下行電文 :"+responseString);
+				Gson gson = new Gson();
+				T01RsBean t01Rs = gson.fromJson(responseString,T01RsBean.class);
+				if(SystemInfo.RETURN_CODE_SUCCESSFUL.equals(t01Rs.getRETURN_CODE())){
+					passRecord.setStatus(3);
+				}else{
+					
+					log.error("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					passRecord.setStatus(2);
+					passRecord.setReSendReason(t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					throw new Exception("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+				}
+				
+			}catch (Exception e) {
+				e.printStackTrace();
+				passRecord.setStatus(2);
+				passRecord.setReSendReason(e.getMessage());
+				throw new Exception(e.getMessage());
+			}
+			
+			iPassRecordRepositoryPersist.savePassRecord(passRecord);
+		}
+		
+	}
+
+	@Override
+	@Transactional(readOnly=false, rollbackFor=Exception.class)
+	public void doQuotion(String[] inputquotionMoneyArrays, String[] inputAllInArrays, String[] inputLoanTypeArrays,
+			String[] inputDaysArrays, String tenderNo, String maxAmount, String extraAmount, String allInRate,
+			String extraType,UserProfileBean userDetails) throws Exception {
+		
+		Ctbflbt1 ctbflbt1= iCtbflbt1RepositoryPersist.findByTenderNo(tenderNo);
+		Ctbflbq1 ctbflbq1= iCtbflbq1RepositoryPersist.findCtbflbq1ByTenderNo(tenderNo);
+		int nextRoleId = 0;
+		Timestamp nowTime= new Timestamp(new Date().getTime());
+		String finalStep=ctbflbq1.getFinalStep();
+		
+		//UPDATE CTBFLBT1
+		ctbflbt1.setStatus("100");
+		iCtbflbt1RepositoryPersist.saveCtbflbt1(ctbflbt1);
+		
+		//UPDATE CTBFLBQ1
+		ctbflbq1.setStatus("100");
+		
+		if("Y".equals(finalStep)){
+			ctbflbq1.setApproveStatus("4");
+		}else if("N".equals(finalStep)){
+			int maxStepNo=iFlowStepRepositoryPersist.getMaxStepNoByFlowId(ctbflbq1.getFlowId());
+			nextRoleId=iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(ctbflbq1.getFlowId(), ctbflbq1.getStepNo()+1);
+			if((ctbflbq1.getStepNo()+1)==maxStepNo){
+				ctbflbq1.setApproveStatus("3");
+				ctbflbq1.setFinalStep("Y");
+			}else{
+				ctbflbq1.setApproveStatus("2");
+			}		
+			
+			ctbflbq1.setStepNo(ctbflbq1.getStepNo()+1);
+			ctbflbq1.setRoleId(nextRoleId);
+		}
+		ctbflbq1.setLastModifyTime(nowTime);
+		ctbflbq1.setLastModifyUser(userDetails.getUsername()+":"+userDetails.getViewUserName());
+		ctbflbq1.setMaxAmount(new BigDecimal(maxAmount));
+		ctbflbq1.setExtraAmount(new BigDecimal(extraAmount));
+		ctbflbq1.setExtraType(extraType);
+		ctbflbq1.setExtraRate(new BigDecimal(allInRate));
+		iCtbflbq1RepositoryPersist.saveCtbflbq1(ctbflbq1);
+		
+		
+		iCtbflbq2RepositoryPersist.removeCtbflbq2ByQuationNo(ctbflbq1.getQuationNo());
+		//SAVE CTBFLBQ2
+		List<Ctbflbq2> ctbflbq2List = new ArrayList<>();
+		IntStream.range(0, inputquotionMoneyArrays.length).forEach(i->{
+			Ctbflbq2 ctbflbq2 = new Ctbflbq2();
+			Ctbflbq2PK ctbflbq2PK =new Ctbflbq2PK(ctbflbq1.getQuationNo(),i+1);
+			ctbflbq2.setId(ctbflbq2PK);
+			ctbflbq2.setExpiredDate(iCtbflbt2RepositoryPersist.findExpiredDateByTenderNoAndDays(tenderNo, Integer.valueOf(inputDaysArrays[i])));
+			ctbflbq2.setDays(Integer.valueOf(inputDaysArrays[i]));
+			ctbflbq2.setLoanType(inputLoanTypeArrays[i]);
+			ctbflbq2.setLoanAmount(ctbflbq1.getLoanAmount());
+			ctbflbq2.setQuationAmount(new BigDecimal(inputquotionMoneyArrays[i]));
+			ctbflbq2.setQuationRate(new BigDecimal(inputAllInArrays[i]));
+				
+			ctbflbq2List.add(ctbflbq2);
+		});
+		iCtbflbq2RepositoryPersist.saveCtbflbq2(ctbflbq2List);
+		
+		//SAVE MESSAGE_INBOX
+		String content="報價號碼:"+ctbflbq1.getQuationNo()+",報價日期"+nowTime;
+		int receiverRole = 0;
+		String subject = null;
+		if("Y".equals(finalStep)){
+			receiverRole=0;
+			subject="報價單已送出";
+		}else if("N".equals(finalStep)){
+			receiverRole=nextRoleId;
+			subject="報價單待審核";
+		}
+		MessageInbox messageInbox =new MessageInbox(userDetails.getBranchId(), content, new Timestamp(new Date().getTime()), receiverRole, userDetails.getUsername(), subject);
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+		
+		
+		if("Y".equals(finalStep)){
+			
+			log.info("報價-發送電文");
+			//組成JSON
+			String t02Json=iJsonMessagePersist.makeT02Message(ctbflbq1, ctbflbq2List, userDetails);
+			log.info("T02上行電文 :"+t02Json);
+			
+			PassRecord passRecord = new PassRecord();
+			passRecord.setTransactionNo(ctbflbq1.getQuationNo());
+			passRecord.setTxId(SystemInfo.TXIDQUATION);
+			passRecord.setTransactionDate(ctbflbq1.getQuationTime());
+			passRecord.setContent(t02Json);
+			passRecord.setBranchId(ctbflbq1.getBranchId());
+			passRecord.setIssuerId(ctbflbq1.getIssuerId());
+			passRecord.setReSendTimes(0);
+			
+			String url =enterpriseRepository.findByUni(ctbflbq1.getIssuerId()).getWsUrl();
+			
+			try{
+				
+				
+				String responseString =iSendMessagePersist.sendMessage(url+SystemInfo.TXIDQUATION, t02Json, SystemInfo.TXIDQUATION);
+				log.info("T02下行電文 :"+responseString);
+				Gson gson = new Gson();
+				T01RsBean t01Rs = gson.fromJson(responseString,T01RsBean.class);
+				if(SystemInfo.RETURN_CODE_SUCCESSFUL.equals(t01Rs.getRETURN_CODE())){
+					passRecord.setStatus(3);
+				}else{
+					
+					log.error("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					passRecord.setStatus(2);
+					passRecord.setReSendReason(t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					throw new Exception("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+				}
+
+				
+				
+			}catch (Exception e) {
+				e.printStackTrace();
+				passRecord.setStatus(2);
+				passRecord.setReSendReason(e.getMessage());
+				throw new Exception(e.getMessage());
+			}
+			
+			iPassRecordRepositoryPersist.savePassRecord(passRecord);
+		}
+		
+	}
+
+	@Override
+	public Page<Ctbflbq1> findQuotionReview(String branchId, int roleId, int pageNumber, int pageSize) {
+		
+		List<String> ApproveStatusList=new ArrayList<>();
+		ApproveStatusList.add("2");
+		ApproveStatusList.add("3");
+		return iCtbflbq1RepositoryPersist.findByBranchIdAndRoleIdAndApproveStatus(branchId, roleId, ApproveStatusList, pageNumber, pageSize);
+
+	}
+
+	@Override
+	public List<Ctbflbq2> findCtbflbq2OrderByIdItemNo(String quationNo) {
+		
+		return iCtbflbq2RepositoryPersist.findByIdQuationNoOrderByIdItemNo(quationNo);
+	}
+
+	@Override
+	public void doReturn(String tenderNo, String reasonForReturnString,UserProfileBean userDetails) {
+		
+		
+		Ctbflbq1 ctbflbq1= iCtbflbq1RepositoryPersist.findCtbflbq1ByTenderNo(tenderNo);
+		//UPDATE CTBFLBQ1
+		Timestamp nowTime= new Timestamp(new Date().getTime());
+		ctbflbq1.setApproveStatus("1");
+		ctbflbq1.setStepNo(1);
+		ctbflbq1.setFinalStep("N");
+		ctbflbq1.setRejectReason(reasonForReturnString);
+		ctbflbq1.setLastModifyTime(nowTime);
+		ctbflbq1.setLastModifyUser(userDetails.getUsername()+":"+userDetails.getViewUserName());
+		
+		int nexRoleId =iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(ctbflbq1.getFlowId(), 1);
+		ctbflbq1.setRoleId(nexRoleId);
+		
+		iCtbflbq1RepositoryPersist.saveCtbflbq1(ctbflbq1);
+		
+		//SAVE MESSAGE_INBOX
+		String content="報價號碼:"+ctbflbq1.getQuationNo()+",報價日期"+nowTime;
+		MessageInbox messageInbox =new MessageInbox(userDetails.getBranchId(), content, new Timestamp(new Date().getTime()), ctbflbq1.getRoleId(), userDetails.getUsername(), "報價單退回");
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+	}
+
+	@Override
+	@Transactional(readOnly=false, rollbackFor=Exception.class)
+	public void doReview(String tenderNo,UserProfileBean userDetails) throws Exception {
+		
+		Ctbflbq1 ctbflbq1= iCtbflbq1RepositoryPersist.findCtbflbq1ByTenderNo(tenderNo);
+		int nextRoleId = 0;
+		Timestamp nowTime= new Timestamp(new Date().getTime());
+		String finalStep=ctbflbq1.getFinalStep();
+		//UPDATE CTBFLBQ1
+		
+		
+		if("Y".equals(finalStep)){
+			ctbflbq1.setApproveStatus("4");
+		}else if("N".equals(finalStep)){
+			int maxStepNo =iFlowStepRepositoryPersist.getMaxStepNoByFlowId(ctbflbq1.getFlowId());
+			nextRoleId=iFlowStepRepositoryPersist.findRoleIdByFlowIdAndStepNo(ctbflbq1.getFlowId(), ctbflbq1.getStepNo()+1);
+			if((ctbflbq1.getStepNo()+1)==maxStepNo){
+				ctbflbq1.setApproveStatus("3");
+				ctbflbq1.setFinalStep("Y");
+			}else{
+				ctbflbq1.setApproveStatus("2");
+			}
+			
+			ctbflbq1.setStepNo(ctbflbq1.getStepNo()+1);
+			ctbflbq1.setRoleId(nextRoleId);
+		}
+		ctbflbq1.setQuationTime(nowTime);
+		ctbflbq1.setLastModifyTime(nowTime);
+		ctbflbq1.setLastModifyUser(userDetails.getUsername()+":"+userDetails.getViewUserName());
+		iCtbflbq1RepositoryPersist.saveCtbflbq1(ctbflbq1);
+			
+		//SAVE MESSAGE_INBOX
+		String content="報價號碼:"+ctbflbq1.getQuationNo()+",報價日期"+nowTime;
+		int receiverRole = 0;
+		String subject = null;
+		if("Y".equals(finalStep)){
+			receiverRole=0;
+			subject="報價單已送出";
+		}else if("N".equals(finalStep)){
+			receiverRole=nextRoleId;
+			subject="報價單待審核";
+		}
+		MessageInbox messageInbox =new MessageInbox(userDetails.getBranchId(), content, new Timestamp(new Date().getTime()), receiverRole, userDetails.getUsername(), subject);
+		iMessageInboxRepositoryPersist.saveMessageInbox(messageInbox);
+		
+		if("Y".equals(finalStep)){
+			
+			log.info("報價-發送電文");
+			//組成JSON
+			List<Ctbflbq2> ctbflbq2List=iCtbflbq2RepositoryPersist.findByIdQuationNoOrderByIdItemNo(ctbflbq1.getQuationNo());
+			String t02Json=iJsonMessagePersist.makeT02Message(ctbflbq1, ctbflbq2List, userDetails);
+			log.info("T02上行電文 :"+t02Json);
+			
+			PassRecord passRecord = new PassRecord();
+			passRecord.setTransactionNo(ctbflbq1.getQuationNo());
+			passRecord.setTxId(SystemInfo.TXIDQUATION);
+			passRecord.setTransactionDate(ctbflbq1.getQuationTime());
+			passRecord.setContent(t02Json);
+			passRecord.setBranchId(ctbflbq1.getBranchId());
+			passRecord.setIssuerId(ctbflbq1.getIssuerId());
+			passRecord.setReSendTimes(0);
+			
+			String url =enterpriseRepository.findByUni(ctbflbq1.getIssuerId()).getWsUrl();
+			
+			try{
+				
+				String responseString =iSendMessagePersist.sendMessage(url+SystemInfo.TXIDQUATION, t02Json, SystemInfo.TXIDQUATION);
+				log.info("T02下行電文 :"+responseString);
+				Gson gson = new Gson();
+				T01RsBean t01Rs = gson.fromJson(responseString,T01RsBean.class);
+				if(SystemInfo.RETURN_CODE_SUCCESSFUL.equals(t01Rs.getRETURN_CODE())){
+					passRecord.setStatus(3);
+				}else{
+					
+					log.error("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					passRecord.setStatus(2);
+					passRecord.setReSendReason(t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+					throw new Exception("T02下行電文回傳錯誤 : "+t01Rs.getRETURN_CODE()+" - "+t01Rs.getRETURN_DESC());
+				}
+
+				
+				
+			}catch (Exception e) {
+				e.printStackTrace();
+				passRecord.setStatus(2);
+				passRecord.setReSendReason(e.getMessage());
+				throw new Exception(e.getMessage());
+			}
+			
+			iPassRecordRepositoryPersist.savePassRecord(passRecord);
+		}
+	}
+
+}

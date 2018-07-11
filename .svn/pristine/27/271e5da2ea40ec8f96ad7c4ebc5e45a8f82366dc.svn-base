@@ -1,0 +1,17 @@
+package com.uxb2b.ecp.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
+
+import com.uxb2b.ecp.model.PassRecord;
+
+
+
+@Repository
+public  interface PassRecordRepository extends JpaRepository<PassRecord, Integer>,PagingAndSortingRepository<PassRecord, Integer>, JpaSpecificationExecutor<PassRecord> {
+
+	public int countByStatus(int status);
+		
+}

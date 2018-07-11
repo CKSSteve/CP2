@@ -1,0 +1,410 @@
+package com.uxb2b.ecp.model;
+
+import java.io.Serializable;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+
+
+/**
+ * The persistent class for the CP_DATA database table.
+ * 
+ */
+@Entity
+@Table(name="CP_DATA")
+@NamedQuery(name="CpData.findAll", query="SELECT c FROM CpData c")
+public class CpData implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name="BATCH_NO")
+	private String batchNo;
+
+	@Column(name="AMOUNT_UNIT")
+	private String amountUnit;
+
+	@Column(name="APPROVE_STATUS")
+	private String approveStatus;
+
+	@Column(name="BANK_ID")
+	private String bankId;
+
+	@Column(name="BRANCH_ID")
+	private String branchId;
+
+	@Column(name="BROKER_ID")
+	private String brokerId;
+
+	@Column(name="BROKER_NAME")
+	private String brokerName;
+
+	@Column(name="CURRENCY_ID")
+	private String currencyId;
+
+	@Column(name="CURRENCY_NAME")
+	private String currencyName;
+
+	@Column(name="[DAYS]")
+	private int days;
+
+	@Column(name="EFFECT_DATE")
+	private String effectDate;
+
+	@Lob
+	@Column(name="ENTRUST_DOC")
+	private byte[] entrustDoc;
+
+	@Column(name="ENTRUST_DOC_ID")
+	private String entrustDocId;
+
+	@Column(name="EXPIRED_DATE")
+	private String expiredDate;
+
+	@Column(name="FINAL_STEP")
+	private String finalStep;
+
+	@Column(name="FLOW_ID")
+	private int flowId;
+
+	@Column(name="GUARANTEE_TYPE")
+	private String guaranteeType;
+
+	@Column(name="GUARANTOR_ID")
+	private String guarantorId;
+
+	@Column(name="GUARANTOR_NAME")
+	private String guarantorName;
+
+	@Column(name="ISSUE_NO")
+	private String issueNo;
+
+	@Column(name="ISSUER_ID")
+	private String issuerId;
+
+	@Column(name="ISSUER_NAME")
+	private String issuerName;
+
+	@Column(name="LAST_MODIFY_TIME")
+	private Timestamp lastModifyTime;
+
+	@Column(name="LAST_MODIFY_USER")
+	private String lastModifyUser;
+
+	@Column(name="LOAN_AMOUNT")
+	private BigDecimal loanAmount;
+
+	@Column(name="LOAN_TYPE")
+	private String loanType;
+
+	@Column(name="PAT_AMOUNT")
+	private BigDecimal patAmount;
+
+	@Column(name="PAY_DATE")
+	private String payDate;
+
+	@Column(name="PAYER")
+	private String payer;
+
+	@Column(name="REJECT_REASON")
+	private String rejectReason;
+
+	@Column(name="ROLE_ID")
+	private int roleId;
+
+	@Lob
+	@Column(name="STATEMENT_DOC")
+	private byte[] statementDoc;
+
+	@Column(name="STATEMENT_DOC_ID")
+	private String statementDocId;
+
+	@Column(name="STATUS")
+	private int status;
+
+	@Column(name="STEP_NO")
+	private int stepNo;
+
+	public CpData() {
+	}
+
+	public String getBatchNo() {
+		return this.batchNo;
+	}
+
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
+
+	public String getAmountUnit() {
+		return this.amountUnit;
+	}
+
+	public void setAmountUnit(String amountUnit) {
+		this.amountUnit = amountUnit;
+	}
+
+	public String getApproveStatus() {
+		return this.approveStatus;
+	}
+
+	public void setApproveStatus(String approveStatus) {
+		this.approveStatus = approveStatus;
+	}
+
+	public String getBankId() {
+		return this.bankId;
+	}
+
+	public void setBankId(String bankId) {
+		this.bankId = bankId;
+	}
+
+	public String getBranchId() {
+		return this.branchId;
+	}
+
+	public void setBranchId(String branchId) {
+		this.branchId = branchId;
+	}
+
+	public String getBrokerId() {
+		return this.brokerId;
+	}
+
+	public void setBrokerId(String brokerId) {
+		this.brokerId = brokerId;
+	}
+
+	public String getBrokerName() {
+		return this.brokerName;
+	}
+
+	public void setBrokerName(String brokerName) {
+		this.brokerName = brokerName;
+	}
+
+	public String getCurrencyId() {
+		return this.currencyId;
+	}
+
+	public void setCurrencyId(String currencyId) {
+		this.currencyId = currencyId;
+	}
+
+	public String getCurrencyName() {
+		return this.currencyName;
+	}
+
+	public void setCurrencyName(String currencyName) {
+		this.currencyName = currencyName;
+	}
+
+	public int getDays() {
+		return this.days;
+	}
+
+	public void setDays(int days) {
+		this.days = days;
+	}
+
+	public String getEffectDate() {
+		return this.effectDate;
+	}
+
+	public void setEffectDate(String effectDate) {
+		this.effectDate = effectDate;
+	}
+
+	public byte[] getEntrustDoc() {
+		return this.entrustDoc;
+	}
+
+	public void setEntrustDoc(byte[] entrustDoc) {
+		this.entrustDoc = entrustDoc;
+	}
+
+	public String getEntrustDocId() {
+		return this.entrustDocId;
+	}
+
+	public void setEntrustDocId(String entrustDocId) {
+		this.entrustDocId = entrustDocId;
+	}
+
+	public String getExpiredDate() {
+		return this.expiredDate;
+	}
+
+	public void setExpiredDate(String expiredDate) {
+		this.expiredDate = expiredDate;
+	}
+
+	public String getFinalStep() {
+		return this.finalStep;
+	}
+
+	public void setFinalStep(String finalStep) {
+		this.finalStep = finalStep;
+	}
+
+	public int getFlowId() {
+		return this.flowId;
+	}
+
+	public void setFlowId(int flowId) {
+		this.flowId = flowId;
+	}
+
+	public String getGuaranteeType() {
+		return this.guaranteeType;
+	}
+
+	public void setGuaranteeType(String guaranteeType) {
+		this.guaranteeType = guaranteeType;
+	}
+
+	public String getGuarantorId() {
+		return this.guarantorId;
+	}
+
+	public void setGuarantorId(String guarantorId) {
+		this.guarantorId = guarantorId;
+	}
+
+	public String getGuarantorName() {
+		return this.guarantorName;
+	}
+
+	public void setGuarantorName(String guarantorName) {
+		this.guarantorName = guarantorName;
+	}
+
+	public String getIssueNo() {
+		return this.issueNo;
+	}
+
+	public void setIssueNo(String issueNo) {
+		this.issueNo = issueNo;
+	}
+
+	public String getIssuerId() {
+		return this.issuerId;
+	}
+
+	public void setIssuerId(String issuerId) {
+		this.issuerId = issuerId;
+	}
+
+	public String getIssuerName() {
+		return this.issuerName;
+	}
+
+	public void setIssuerName(String issuerName) {
+		this.issuerName = issuerName;
+	}
+
+	public Timestamp getLastModifyTime() {
+		return this.lastModifyTime;
+	}
+
+	public void setLastModifyTime(Timestamp lastModifyTime) {
+		this.lastModifyTime = lastModifyTime;
+	}
+
+	public String getLastModifyUser() {
+		return this.lastModifyUser;
+	}
+
+	public void setLastModifyUser(String lastModifyUser) {
+		this.lastModifyUser = lastModifyUser;
+	}
+
+	public BigDecimal getLoanAmount() {
+		return this.loanAmount;
+	}
+
+	public void setLoanAmount(BigDecimal loanAmount) {
+		this.loanAmount = loanAmount;
+	}
+
+	public String getLoanType() {
+		return this.loanType;
+	}
+
+	public void setLoanType(String loanType) {
+		this.loanType = loanType;
+	}
+
+	public BigDecimal getPatAmount() {
+		return this.patAmount;
+	}
+
+	public void setPatAmount(BigDecimal patAmount) {
+		this.patAmount = patAmount;
+	}
+
+	public String getPayDate() {
+		return this.payDate;
+	}
+
+	public void setPayDate(String payDate) {
+		this.payDate = payDate;
+	}
+
+	public String getPayer() {
+		return this.payer;
+	}
+
+	public void setPayer(String payer) {
+		this.payer = payer;
+	}
+
+	public String getRejectReason() {
+		return this.rejectReason;
+	}
+
+	public void setRejectReason(String rejectReason) {
+		this.rejectReason = rejectReason;
+	}
+
+	public int getRoleId() {
+		return this.roleId;
+	}
+
+	public void setRoleId(int roleId) {
+		this.roleId = roleId;
+	}
+
+	public byte[] getStatementDoc() {
+		return this.statementDoc;
+	}
+
+	public void setStatementDoc(byte[] statementDoc) {
+		this.statementDoc = statementDoc;
+	}
+
+	public String getStatementDocId() {
+		return this.statementDocId;
+	}
+
+	public void setStatementDocId(String statementDocId) {
+		this.statementDocId = statementDocId;
+	}
+
+	public int getStatus() {
+		return this.status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	public int getStepNo() {
+		return this.stepNo;
+	}
+
+	public void setStepNo(int stepNo) {
+		this.stepNo = stepNo;
+	}
+
+}

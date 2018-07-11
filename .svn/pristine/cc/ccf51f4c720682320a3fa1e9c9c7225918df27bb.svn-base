@@ -1,0 +1,129 @@
+package com.uxb2b.ecp.web.controller;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import com.uxb2b.ecp.bean.QueryTenderBean;
+import com.uxb2b.ecp.business.IQueryTenderBusiness;
+import com.uxb2b.ecp.model.Ctbflbt1;
+import com.uxb2b.ecp.model.Enterprise;
+import com.uxb2b.ecp.model.SysCode;
+import com.uxb2b.ecp.persist.ISysCodeRepositoryPersist;
+import com.uxb2b.ecp.repository.EnterpriseRepository;
+import com.uxb2b.ecp.service.SystemInfo;
+
+
+/**
+ * 標單查詢
+ * @author steve
+ *
+ */
+
+@Controller
+@RequestMapping(value = "/tenderQuery")
+public class TenderQueryController {
+
+	private Logger log = LoggerFactory.getLogger(TenderQueryController.class);
+	
+	@Autowired
+	SystemInfo systemInfo;
+	
+	@Autowired
+	EnterpriseRepository enterpriseRepository;
+	
+	@Autowired
+	ISysCodeRepositoryPersist iSysCodeRepositoryPersist;
+	
+	@Autowired
+	IQueryTenderBusiness iQueryTenderBusiness;
+	
+	/**
+	 * 標單查詢條件頁
+	 * 
+	 * @return issuerIdList 公司清單
+	 * @return currencyList 幣別清單
+	 */
+	
+	@RequestMapping
+	public String main(Model model) {
+		
+		List<Enterprise> enterpriseList=iQueryTenderBusiness.findAllEnterprise();
+		List<SysCode> sysCodeList=iQueryTenderBusiness.findSysCodeByCodeType(SystemInfo.SYSCODE_CODETYPE_CURRENCY);
+		
+		model.addAttribute("issuerIdList", enterpriseList);
+		model.addAttribute("currencyList", sysCodeList);
+		return "tender/tenderQuery";
+	}
+	
+	/**
+	 * 查詢結果
+	 * 
+	 * @param searchBean 查詢條件
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return issuerIdList 公司清單
+	 * @return currencyList 幣別清單
+	 * @return queryTenderList 查詢結果
+	 * @return searchBean 查詢條件
+	 * @return showForm 顯示查詢條件
+	 */
+	
+	
+	@RequestMapping(value = "/doQuery", method = RequestMethod.POST)
+    public String doQuery(QueryTenderBean searchBean,
+    					  @RequestParam(value = "page", defaultValue = "1") int pageNumber,
+    					  @RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize,
+    					  Model model) {
+		
+		try {
+			List<Enterprise> enterpriseList=iQueryTenderBusiness.findAllEnterprise();
+			List<SysCode> sysCodeList=iQueryTenderBusiness.findSysCodeByCodeType(SystemInfo.SYSCODE_CODETYPE_CURRENCY);
+			Page<Ctbflbt1> queryTenderList = iQueryTenderBusiness.findTender(searchBean, pageNumber, pageSize);
+			
+			model.addAttribute("issuerIdList", enterpriseList);
+			model.addAttribute("currencyList", sysCodeList);
+			model.addAttribute("queryTenderList", queryTenderList);
+			model.addAttribute("searchBean", searchBean);
+			model.addAttribute("showForm", true);
+		} catch (Exception e) {
+			
+			log.error("標單查詢失敗:"+e);
+			e.printStackTrace();
+			model.addAttribute("message", "查詢失敗");
+		}
+		
+		return "tender/tenderQuery";
+	}
+	
+	/**
+	 * 明細顯示
+	 * 
+	 * @param searchBean 查詢條件 
+	 * @param detailTenderNo 標單號碼
+	 * @param method 上一頁路徑
+	 * @return tenderDetail 標單明細
+	 * @return searchBean 查詢條件
+	 * @return method 上一頁路徑
+	 */
+	
+	@RequestMapping(value = "/showDetail", method = RequestMethod.POST)
+    public String showDetail(Model model,QueryTenderBean searchBean,@RequestParam String detailTenderNo,@RequestParam String method){
+    	
+		Ctbflbt1 ctbflbt1=iQueryTenderBusiness.findByTenderNo(detailTenderNo);
+		
+		model.addAttribute("tenderDetail", ctbflbt1);
+		model.addAttribute("searchBean", searchBean);
+		model.addAttribute("method", method);
+		
+		return "tender/tenderQueryShowDetail";
+    }
+	
+}

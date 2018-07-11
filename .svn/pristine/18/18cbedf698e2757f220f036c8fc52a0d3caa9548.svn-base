@@ -1,0 +1,197 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+
+	<!-- 下載標單資料 --> 
+    <bean id="downloadTenderDataDaemon" class="com.uxb2b.ecp.daemon.DownloadTenderData" />
+    <!-- 下載本票登錄資料 -->
+    <bean id="downloadBatchRegisterDataDaemon" class="com.uxb2b.ecp.daemon.DownloadBatchRegisterData" />
+	<!-- 下載本票委請書及聲明書 -->
+	<bean id="downloadEntrustStatementDocDaemon" class="com.uxb2b.ecp.daemon.DownloadEntrustStatementDoc" />
+	<!-- 下載本票登錄狀態 -->
+	<bean id="downloadBatchRegisterStatusDaemon" class="com.uxb2b.ecp.daemon.DownloadBatchRegisterStatus" />
+	<!-- 上傳標單狀態 -->
+	<bean id="uploadTenderStatusDaemon" class="com.uxb2b.ecp.daemon.UploadTenderStatus" />
+    <!-- 下載決標資料 -->
+    <bean id="downloadAwardDataDaemon" class="com.uxb2b.ecp.daemon.DownloadAwardData" />
+    
+  
+	
+	<!-- 啟動觸發器開始 -->  
+    <bean name="startQuertz" lazy-init="false" autowire="no"  
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+        
+        <!--QuartzScheduler 延遲啟動/秒-->
+  		<property name="startupDelay" value="20" />
+  		
+        <property name="triggers">  
+            <list>  
+            	<!-- 標單資料處理 -->
+                <ref bean="downloadTenderDataTrigger" />
+                <!-- 本票登錄資料處理-->
+                <ref bean="dodownloadBatchRegisterDataTrigger" />
+                <!-- 本票委請書及聲明書處理 -->
+                <ref bean="downloadEntrustStatementDocTrigger" />
+                <!-- 本票登錄狀態處理 -->
+                <ref bean="downloadBatchRegisterStatusTrigger" />
+                <!-- 標單狀態處理-->
+                <ref bean="uploadTenderStatusTrigger" />
+                <!-- 下載決標資料  -->
+                <ref bean="downloadAwardDataTrigger" />
+            </list> 
+        </property>  
+    </bean>  
+    <!-- 啟動觸發器結束 -->  
+  
+    <!-- 調度的配置開始 -->  
+    <!-- quartz-2.x的配置 -->  
+    <!-- 
+        0/8 * * * * ?             每隔8秒
+        0 0/30 * * * ?            每隔30分 
+		0 0/15 * * * ?            每隔15分 
+		0 0 0/1 * * ?             每隔1小時 
+		0 0 12 * * ?              每天12:00觸發事件
+		0 15 10 ？ * *              每天10:15觸發事件
+		0 15 10 * * ?             每天10:15觸發事件
+		0 15 10 * * ? *           每天10:15觸發事件
+		0 15 10 * * ? 2005        2005年的每天10:15觸發事件
+		0 * 14 * * ?              每天14點開始觸發，每分鐘觸發一次，14:59分結束
+		0 0/5 14 * * ?            每天14點開始觸發到14:59分結束的每5分鐘觸發一次事件
+		0 0/5 14,18 * * ?         每天14點開始到14:59期間和18點到18:59期間的每5分鐘觸發一次事件
+		0 0-5 14 * * ?            每天14點到14:05期間的每1分鐘觸發一次事件
+		0 10,44 14 ? 3 WED        每年3月的星期三的14:10和14:44觸發一次事件
+		0 15 10 ? * MON-FRI       週一至週五的10:15觸發一次事件
+		0 15 10 15 * ?            每月15日10:15觸發一次事件
+		0 15 10 L * ?             每月最後一日的10:15觸發一次事件
+		0 15 10 ? * 6L            每月的最後一個星期五10:15觸發一次事件
+		0 15 10 ? * 6L 2002-2005  2002年至2005年的每月的最後一個星期五10:15觸發一次事件
+		0 15 10 ? * 6#3                               每月的第三個星期五10:15觸發一次事件
+	-->
+    <bean id="downloadTenderDataTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="downloadTenderDataJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 15 10 ? * 6L</value>
+        </property>  
+    </bean>
+    
+    <!-- 決標資料 每30分鐘執行一次  -->
+    <bean id="downloadAwardDataTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="downloadTenderDataJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 0/30 * * * ?</value>
+        </property>  
+    </bean>
+
+    <bean id="dodownloadBatchRegisterDataTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="dodownloadBatchRegisterDataJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 15 10 ? * 6L</value>
+        </property>  
+    </bean>
+    
+    <bean id="downloadEntrustStatementDocTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="downloadEntrustStatementDocJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 15 10 ? * 6L</value>
+        </property>  
+    </bean>
+    
+    <bean id="downloadBatchRegisterStatusTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="downloadBatchRegisterStatusJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 15 10 ? * 6L</value>
+        </property>  
+    </bean>
+    
+    <bean id="uploadTenderStatusTrigger"  
+        class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+        <property name="jobDetail">  
+            <ref bean="uploadTenderStatusJob" />  
+        </property>  
+        <property name="cronExpression">           
+        	<value>0 15 10 ? * 6L</value>
+        </property>  
+    </bean>
+<!--     調度的配置結束   -->
+  
+    <!-- job的配置開始 -->  
+    <bean id="downloadTenderDataJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="downloadTenderDataDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+    
+    <bean id="dodownloadBatchRegisterDataJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="downloadBatchRegisterDataDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+    
+    <bean id="downloadEntrustStatementDocJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="downloadEntrustStatementDocDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+    
+    <bean id="downloadBatchRegisterStatusJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="downloadBatchRegisterStatusDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+    
+   <bean id="uploadTenderStatusJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="uploadTenderStatusDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+    
+    <bean id="downloadAwardDataJob"  
+        class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="downloadAwardDataDaemon" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>process</value>  
+        </property>  
+    </bean>
+
+    <!-- job的配置結束 -->  
+  
+</beans>

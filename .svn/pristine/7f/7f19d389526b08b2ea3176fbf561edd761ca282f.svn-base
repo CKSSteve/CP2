@@ -1,0 +1,424 @@
+package com.uxb2b.ecp.web.controller;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.uxb2b.ecp.bean.UserProfileBean;
+import com.uxb2b.ecp.business.IBranchBusiness;
+import com.uxb2b.ecp.business.ILoginBusiness;
+import com.uxb2b.ecp.business.IRoleBusiness;
+import com.uxb2b.ecp.business.IUserBusiness;
+import com.uxb2b.ecp.business.IUserLogBusiness;
+import com.uxb2b.ecp.model.Branch;
+import com.uxb2b.ecp.model.Role;
+import com.uxb2b.ecp.model.User;
+import com.uxb2b.ecp.service.AlgorithmService;
+import com.uxb2b.ecp.service.SystemInfo;
+
+
+/**
+ * 帳號管理
+ * @author steve
+ *
+ */
+@Controller
+@RequestMapping(value = "/accountManagement")
+public class AccountController {
+
+	private Logger log = LoggerFactory.getLogger(AccountController.class);
+
+	@Autowired
+	SystemInfo systemInfo;
+
+	@Autowired
+	IUserBusiness iUserBusiness;
+
+	@Autowired
+	IRoleBusiness iRoleBusiness;
+
+	@Autowired
+	ILoginBusiness iLoginBusiness;
+
+	@Autowired
+	IBranchBusiness iBranchBusiness;
+
+	@Autowired
+	AlgorithmService algorithmService;
+
+	@Autowired
+	IUserLogBusiness iUserLogBusiness;
+
+	/**
+	 * 帳號管理進入頁面
+	 * 
+	 * @param pageNumber 第幾頁
+	 * @param pageSize 一頁顯示幾筆資料
+	 * @return signUserId 編輯者的USERID
+	 * @return users USER資料
+	 */
+	
+	
+	@RequestMapping
+	public String main(@RequestParam(value = "page", defaultValue = "1") int pageNumber,
+			@RequestParam(value = "page.size", defaultValue = SystemInfo.PAGE_SIZE) int pageSize, Model model) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userId = userDetails.getUsername();
+		
+		try {
+			User user = iUserBusiness.personalUserSetting(userId);
+			Page<User> userPage = iUserBusiness.getAccountUserByManagement(user, pageNumber, pageSize);
+			model.addAttribute("users", userPage);
+			model.addAttribute("signUserId", userId);
+
+			return "user/accountManagement";
+		} catch (Exception e) {
+			log.error("帳號管理進入頁面顯示失敗:"+e);
+			e.printStackTrace();
+			model.addAttribute("functionName", "帳號管理");
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			return "common/message";
+		}
+
+	}
+
+	/**
+	 * 修改進入頁面
+	 * 
+	 * @param userId 被修改者的USERID
+	 * @param userName 被修改者的USERNAME
+	 * @return modifyUser 被修改者的USER資料
+	 * @return roleList 角色清單
+	 * @return pwdChangeday 密碼有效天數
+	 * @return branchList 分行清單
+	 */
+
+	@RequestMapping(value = "/moidfyAccount")
+	public String moidfyAccount(Model model, @RequestParam String userId, @RequestParam String userName) {
+
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String makeUserId = userDetails.getUsername();
+		
+		try {
+			//修改者
+			User makeUser=iUserBusiness.personalUserSetting(makeUserId);
+			//被修改者
+			User modifyUser = iUserBusiness.personalUserSetting(userId);
+			System.out.println("BranchID :"+modifyUser.getBranchId());
+			List<Role> roleList;
+			List<Branch> branchList;
+			if (makeUser.getRoleId() == 1) {
+				roleList = iRoleBusiness.findAllRole();
+			} else {
+				List<Integer> roleId = new ArrayList<Integer>();
+				roleId.add(1);
+				roleList = iRoleBusiness.findRoleNot(roleId);
+			}
+			if(SystemInfo.HEADOFFICETYPEID.equals(makeUser.getBranch().getTypeId())){
+				 branchList = iBranchBusiness.findAllBranch();
+			}else{
+				branchList=Arrays.asList(iBranchBusiness.findBranchByBranchId(makeUser.getBranchId()));
+			}
+
+
+			model.addAttribute("modifyUser", modifyUser);
+			model.addAttribute("roleList", roleList);
+			model.addAttribute("pwdChangeday", iLoginBusiness.pwdChangeday(modifyUser.getChangePasswordTime()));
+			model.addAttribute("branchList", branchList);
+			model.addAttribute("userBranchId", modifyUser.getBranchId());
+			return "user/modifyUserSetting";
+		} catch (Exception e) {
+			log.error("帳號管理-修改進入頁面顯示失敗:"+e);
+			e.printStackTrace();
+			model.addAttribute("functionName", "帳號管理");
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			return "common/message";
+		}
+		
+
+	}
+
+	/**
+	 * 修改
+	 * 
+	 * @param userId 被修改者的USERID
+	 * @param userName 被修改者的USERNAME
+	 * @param branchName 分行
+	 * @param roleId 角色
+	 * @param newPwd 新密碼
+	 * @param telNo 電話
+	 * @param email 電子郵件
+	 * @param businessTypeQ 承作標單業務
+	 * @param businessTypeC 承作本票業務
+	 * @param businessTypeG 承作保證業務
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/updateMoidfyAccount", method = RequestMethod.POST)
+	public String moidfyAccountSave(Model model, @RequestParam String userId, @RequestParam String userName,
+			@RequestParam String branchName, @RequestParam String roleId, @RequestParam String newPwd,
+			@RequestParam String telNo, @RequestParam String email,
+			@RequestParam(value = "businessTypeQ", required = false) String businessTypeQ,
+			@RequestParam(value = "businessTypeC", required = false) String businessTypeC,
+			@RequestParam(value = "businessTypeG", required = false) String businessTypeG) {
+
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userDetailId = userDetails.getUsername();
+		String viewUserName = userDetails.getViewUserName();
+		String logContent;
+
+		try {
+			User modifyUser = iUserBusiness.personalUserSetting(userId);
+			modifyUser.setUserName(userName);
+			if (StringUtils.isNotBlank(newPwd)) {
+				modifyUser.setPassword(algorithmService.toEncryptMD5(newPwd));
+				modifyUser.setChangePasswordTime(new Timestamp(new Date().getTime()));
+				if(userDetailId.equals(userId)){
+					userDetails.setChangePwdtime(90);
+				}
+			}
+			modifyUser.setBranchId(branchName);
+			modifyUser.setRoleId(Integer.valueOf(roleId));
+			modifyUser.setTelNo(telNo);
+			modifyUser.setEmail(email);
+			if (StringUtils.isNotBlank(businessTypeQ)) {
+				modifyUser.setBusinessTypeQ("Y");
+			} else {
+				modifyUser.setBusinessTypeQ("N");
+			}
+			if (StringUtils.isNotBlank(businessTypeC)) {
+				modifyUser.setBusinessTypeC("Y");
+			} else {
+				modifyUser.setBusinessTypeC("N");
+			}
+			if (StringUtils.isNotBlank(businessTypeG)) {
+				modifyUser.setBusinessTypeG("Y");
+			} else {
+				modifyUser.setBusinessTypeG("N");
+			}
+
+			logContent = "帳號管理(" + userId + ")[" + userName + "]修改成功";
+			iUserBusiness.personalUserSave(modifyUser);
+			iUserLogBusiness.accountSetting(userDetailId, viewUserName, SystemInfo.USER_LOG_ACTION_MODIFY, logContent);
+
+		} catch (Exception e) {
+			log.error("帳號管理修改失敗 :" + e);
+			e.printStackTrace();
+			logContent = "帳號管理(" + userId + ")[" + userName + "]修改失敗";
+			iUserLogBusiness.ErrorLog(userDetailId, viewUserName, SystemInfo.USER_LOG_FUNCTION_ID_ACCOUNT_SETTING,
+					SystemInfo.USER_LOG_ACTION_MODIFY, logContent);
+			logContent=SystemInfo.SYSTEM_ERROR;
+		}
+		model.addAttribute("functionUrl", "accountManagement");
+		model.addAttribute("functionMenuName", "帳號管理");
+		model.addAttribute("functionName", "帳號管理");
+		model.addAttribute("message", logContent);
+
+		return "common/message";
+	}
+
+	/**
+	 * 關閉帳號
+	 *
+	 * @param userId 被關閉者的USERID
+	 * @param userName 被關閉者的USERNAME
+	 * @return
+	 */
+	
+	@RequestMapping(value = "/disableAccount")
+	public String disableAccount(Model model, @RequestParam String userId, @RequestParam String userName) {
+
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userDetailId = userDetails.getUsername();
+		String userDetailUserName = userDetails.getViewUserName();
+		String logContent;
+		String logAction;
+		
+		try {
+
+			User modifyUser = iUserBusiness.personalUserSetting(userId);
+			if (modifyUser.getStatus() == 1) {
+				modifyUser.setStatus(SystemInfo.USER_CLOSE);
+				logAction=SystemInfo.USER_LOG_ACTION_CLOSE;
+			} else {
+				modifyUser.setStatus(SystemInfo.USER_OPEN);
+				logAction=SystemInfo.USER_LOG_ACTION_OPEN;
+			}
+			logContent = "帳號管理(" + userId + ")[" + userName + "]變更狀態成功";
+			iUserBusiness.personalUserSave(modifyUser);
+			iUserLogBusiness.accountSetting(userDetailId, userDetailUserName, logAction, logContent);
+
+		} catch (Exception e) {
+			log.error("帳號管理變更狀態失敗 :" + e);
+			e.printStackTrace();
+			logContent = "帳號管理(" + userId + ")[" + userName + "]變更狀態失敗";
+			iUserLogBusiness.ErrorLog(userDetailId, userDetailUserName, SystemInfo.USER_LOG_FUNCTION_ID_ACCOUNT_SETTING,
+					SystemInfo.USER_LOG_ACTION_MODIFY, logContent);
+			logContent=SystemInfo.SYSTEM_ERROR;
+		}
+		model.addAttribute("functionUrl", "accountManagement");
+		model.addAttribute("functionName", "帳號管理");
+		model.addAttribute("functionMenuName", "帳號管理");
+		model.addAttribute("message", logContent);
+		return "common/message";
+
+	}
+
+	/**
+	 * 新增進入頁面
+	 * 
+	 * @return roles 角色清單
+	 * @return branchs 分行清單
+	 */
+	
+	@RequestMapping(value = "/newAccount")
+	public String newAccount(Model model) {
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		int userRoleId = userDetails.getRoleId();
+		List<Role> roleList;
+		List<Branch> branchList;
+		
+		try {
+			User makeUser=iUserBusiness.personalUserSetting(userDetails.getUsername());
+			if (userRoleId == 1) {
+				roleList = iRoleBusiness.findAllRole();
+			} else {
+				List<Integer> roleId = new ArrayList<Integer>();
+				roleId.add(1);
+				roleList = iRoleBusiness.findRoleNot(roleId);
+			}
+			if(SystemInfo.HEADOFFICETYPEID.equals(makeUser.getBranch().getTypeId())){
+				 branchList = iBranchBusiness.findAllBranch();
+			}else{
+				branchList=Arrays.asList(iBranchBusiness.findBranchByBranchId(makeUser.getBranchId()));
+			}
+			
+			model.addAttribute("roles", roleList);
+			model.addAttribute("branchs", branchList);
+
+			return "user/addUserSetting";
+		} catch (Exception e) {
+			log.error("帳號管理-新增進入頁面:"+e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "帳號管理");
+			return "common/message";
+		}
+		
+	}
+
+	/**
+	 * 新增
+	 * 
+	 * @param userId 新增的USERID
+	 * @param userName 新增的USERNAME
+	 * @param branchName 分行
+	 * @param roleId 角色
+	 * @param newPwd 密碼
+	 * @param telNo 電話
+	 * @param email 電子郵件
+	 * @param businessTypeQ 承作標單業務
+	 * @param businessTypeC 承作本票業務
+	 * @param businessTypeG 承作保證業務
+	 * @return
+	 */
+	
+	
+	@RequestMapping(value = "/addNewAccount")
+	public String addNewAccount(Model model, @RequestParam String userId, @RequestParam String userName,
+			@RequestParam String branchName, @RequestParam String roleId, @RequestParam String newPwd,
+			@RequestParam String telNo, @RequestParam String email,
+			@RequestParam(value = "businessTypeQ", required = false) String businessTypeQ,
+			@RequestParam(value = "businessTypeC", required = false) String businessTypeC,
+			@RequestParam(value = "businessTypeG", required = false) String businessTypeG) {
+
+		UserProfileBean userDetails = systemInfo.getUserProfileBean();
+		String userDetailId = userDetails.getUsername();
+		String userDetailUserName = userDetails.getViewUserName();
+		String logContent;
+		
+		try {
+			User addUser=new User(userId, userName, branchName, Integer.valueOf(roleId), algorithmService.toEncryptMD5(newPwd), telNo, email);
+			addUser.setChangePasswordTime(new Timestamp(new Date().getTime()));
+			addUser.setErrorCount(SystemInfo.ERROR_COUNT_CLEAR);
+			addUser.setStatus(SystemInfo.USER_OPEN);
+			if (StringUtils.isNotBlank(businessTypeQ)) {
+				addUser.setBusinessTypeQ("Y");
+			} else {
+				addUser.setBusinessTypeQ("N");
+			}
+			if (StringUtils.isNotBlank(businessTypeC)) {
+				addUser.setBusinessTypeC("Y");
+			} else {
+				addUser.setBusinessTypeC("N");
+			}
+			if (StringUtils.isNotBlank(businessTypeG)) {
+				addUser.setBusinessTypeG("Y");
+			} else {
+				addUser.setBusinessTypeG("N");
+			}
+			Role role =iRoleBusiness.findByRoleId(Integer.valueOf(roleId));
+			addUser.setRole(role);
+			
+			Branch branch=iBranchBusiness.findBranchByBranchId(branchName);
+			addUser.setBranch(branch);
+			
+			iUserBusiness.personalUserSave(addUser);			 			
+			logContent = "帳號管理(" + userId + ")[" + userName + "]新增成功";
+			iUserLogBusiness.accountSetting(userDetailId, userDetailUserName, SystemInfo.USER_LOG_ACTION_ADD, logContent);
+		} catch (Exception e) {
+			log.error("帳號管理新增失敗 :" + e);
+			e.printStackTrace();
+			logContent = "帳號管理(" + userId + ")[" + userName + "]新增失敗";
+			iUserLogBusiness.ErrorLog(userDetailId, userDetailUserName, SystemInfo.USER_LOG_FUNCTION_ID_ACCOUNT_SETTING,
+					SystemInfo.USER_LOG_ACTION_ADD, logContent);
+			logContent=SystemInfo.SYSTEM_ERROR;
+		}
+		model.addAttribute("functionUrl", "accountManagement");
+		model.addAttribute("functionMenuName", "帳號管理");
+		model.addAttribute("functionName", "帳號管理");
+		model.addAttribute("message", logContent);
+		return "common/message";
+	}
+	
+	/**
+	 * 預覽
+	 * 
+	 * @param userId 欲預覽的USERID
+	 * @return pwdChangeday 密碼有效天數
+	 * @return modifyUser USER資料
+	 */
+	
+	@RequestMapping(value = "/previewAccount")
+	public String previewAccount(Model model, @RequestParam String userId){
+		
+		try {
+			User modifyUser = iUserBusiness.personalUserSetting(userId);
+			
+			model.addAttribute("pwdChangeday", iLoginBusiness.pwdChangeday(modifyUser.getChangePasswordTime()));
+			model.addAttribute("modifyUser", modifyUser);
+			return "user/previewUserSetting";
+		} catch (Exception e) {
+			log.error("帳號管理-預覽顯示失敗:"+e);
+			e.printStackTrace();
+			model.addAttribute("message", SystemInfo.SYSTEM_ERROR);
+			model.addAttribute("functionName", "帳號管理");
+			return "common/message";
+		}
+
+	}
+	
+}

@@ -1,0 +1,302 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="tags" tagdir="/WEB-INF/tags"%>
+
+<html>
+<head>
+<c:if test="${message!=null && !empty message}">
+  <script type="text/javascript">
+  alert('<c:out value="${message}" />');
+  </script>
+  </c:if>
+  
+<script type="text/javascript" language="javascript">
+
+$(function() {
+	$("#effectDateStartDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+   	
+	$("#effectDateEndDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+	
+	$("#expiredDateStartDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+	
+	$("#expiredDateEndDate").datepicker({showOn: 'both', showOtherMonths: true,
+	   	showWeeks: true, firstDay: 1, changeFirstDay: false,
+	   	buttonImageOnly: true, buttonImage: '<c:url value="/resources/images/calendar.gif"/>'});
+ 	
+   	$("#query").click(function(){		
+		var effectDateStartDate = $("#effectDateStartDate").val();
+		var effectDateEndDate = $("#effectDateEndDate").val();
+		var expiredDateStartDate = $("#expiredDateStartDate").val();
+		var expiredDateEndDate = $("#expiredDateEndDate").val();
+		
+		if(effectDateStartDate != ""){
+			var startDate1 = new Date(effectDateStartDate).getTime();			
+		}
+		
+		if(effectDateEndDate != ""){
+			var endDate1 = new Date(effectDateEndDate).getTime();			
+		}
+
+		if(expiredDateStartDate != ""){
+			var startDate2 = new Date(expiredDateStartDate).getTime();			
+		}
+		
+		if(expiredDateEndDate != ""){
+			var endDate2 = new Date(expiredDateEndDate).getTime();			
+		}
+		if(expiredDateStartDate.length == 0 && expiredDateEndDate.length == 0){
+			if (effectDateStartDate.length != 0 && effectDateEndDate.length != 0 && effectDateStartDate > effectDateEndDate) {
+				alert("發票起始日期不能小於結束日期");
+				return false;
+			}else if(effectDateStartDate.length == 0 && effectDateEndDate.length == 0 && expiredDateStartDate.length==0 && expiredDateEndDate.length == 0){
+				alert("請輸入發票日期或到期日期");
+				return false;
+			}else if(effectDateStartDate.length == 0 || effectDateEndDate.length == 0){
+				alert("發票起迄日皆需輸入");
+				return false;
+			} else if(effectDateStartDate.length != 0 && effectDateEndDate.length != 0 && ( (endDate1 - startDate1)/(1000 * 60 * 60 * 24) > 365 ) ){
+				alert("發票日期查詢區間以一年為限");
+				return false;
+		    }
+		}
+		if(effectDateStartDate.length == 0 && effectDateEndDate.length == 0){
+			if (expiredDateStartDate.length != 0 && expiredDateEndDate.length != 0 && expiredDateStartDate > expiredDateEndDate) {
+				alert("到期起始日期不能小於結束日期");
+				return false;
+			}else if(expiredDateStartDate.length == 0 && expiredDateEndDate.length == 0){
+				alert("請輸入到期日期");
+				return false;
+			}else if(expiredDateStartDate.length == 0 || expiredDateEndDate.length == 0){
+				alert("到期起迄日皆需輸入");
+				return false;
+			} else if(expiredDateStartDate.length != 0 && expiredDateEndDate.length != 0 && ( (endDate2 - startDate2)/(1000 * 60 * 60 * 24) > 365 ) ){
+				alert("到期日期查詢區間以一年為限");
+				return false;
+		    }
+		}
+		
+		if((effectDateStartDate.length != 0 && effectDateEndDate.length == 0)||(effectDateStartDate.length == 0 && effectDateEndDate.length != 0)){
+			alert("發票起迄日皆需輸入");
+			return false;
+		}
+		
+		if((expiredDateStartDate.length != 0 && expiredDateEndDate.length == 0)||(expiredDateStartDate.length == 0 && expiredDateEndDate.length != 0)){
+			alert("到期起迄日皆需輸入");
+			return false;
+		}
+			$("#queryForm").attr("action", '<c:url value="/batchQuery/doQuery"/>');
+			$("#queryForm").submit();
+	});
+   	
+   	$("#reset").click(function(){
+   		$("#effectDateStartDate").val("");
+   		$("#effectDateEndDate").val("");
+   		$("#expiredDateStartDate").val("");
+   		$("#expiredDateEndDate").val("");
+   		$("#issuerId").val("0");
+   		$("#currencyId").val("0");  		
+   		
+   	});
+   	
+})
+
+function showDetail(varbatchNo){
+	$("#detailBatchNo").val(varbatchNo);
+	$("#method").val("/batchQuery/doQuery");
+	$("#queryForm").attr("action", '<c:url value="/batchQuery/showDetail"/>');
+	$("#queryForm").submit();
+}
+
+</script>
+</head>
+
+<body id="scroller">
+<h1><span class="title-l">本票資料查詢</span>-請選擇查詢方式</h1>
+<form:form id="queryForm" name="queryForm" method="POST" commandName="searchBean">
+   <input id="method" type="hidden" name="method">
+   <input id="toPage" type="hidden" name="page">
+   <input id="detailBatchNo" type="hidden" name="detailBatchNo">
+ <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" /></td>
+    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" /></td>
+  </tr>
+  <tr>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+    <td>
+      <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table05">
+      		<tr>
+			<th width="110">發行人統編</th>
+			<td colspan="3">
+				<div align="left">
+					<select  name="issuerId" id="issuerId">
+						<option value="0" label="全部" />
+						<c:forEach var="issuerId" items="${issuerIdList}">
+							<c:choose>
+							<c:when test="${searchBean.issuerId == issuerId.uni}">
+		           				<option value="${issuerId.uni}" selected="selected">
+		           				<c:out value="${issuerId.uni}" />&nbsp;<c:out value="${issuerId.chineseName}" /></option>
+		           			</c:when>
+		           			<c:otherwise>
+								<option value="${issuerId.uni}">
+									<c:out value="${issuerId.uni}" />&nbsp;<c:out value="${issuerId.chineseName}" />
+								</option>
+							</c:otherwise>
+							</c:choose>
+						</c:forEach>
+					</select>
+				</div>
+			</td>
+		</tr>
+      	<tr>
+          <th width="110"><span>發票日</span></th>
+            <td><div align="left">自
+                <input type="Date pickers" id="effectDateStartDate" name="effectDateStartDate" value="${searchBean.effectDateStartDate }" class="textfield dateISO" size="10"/>
+                	至
+                <input type="Date pickers" id="effectDateEndDate" name="effectDateEndDate" value="${searchBean.effectDateEndDate }" class="textfield dateISO" size="10" />
+                </div>
+            </td>
+        </tr>
+        <tr>
+          <th width="110"><span>到期日</span></th>
+            <td><div align="left">自
+                <input type="Date pickers" id="expiredDateStartDate" name=expiredDateStartDate value="${searchBean.expiredDateStartDate }" class="textfield dateISO" size="10"/>
+                	至
+                <input type="Date pickers" id="expiredDateEndDate" name="expiredDateEndDate" value="${searchBean.expiredDateEndDate}" class="textfield dateISO" size="10" />
+                </div>
+            </td>
+        </tr>
+		<tr>
+			<th width="110">幣別</th>
+			<td colspan="3">
+				<div align="left">
+					<select  name="currencyId" id="currencyId">
+						<option value="0" label="全部" />
+						<c:forEach var="currency" items="${currencyList}">
+						<c:choose>
+							<c:when test="${searchBean.currencyId == currency.id.codeKey}">
+			           			<option value="${currency.id.codeKey}" selected="selected">
+									<c:out value="${currency.id.codeKey}" />&nbsp;<c:out value="${currency.codeValue}" />
+								</option>
+			           		</c:when>
+			           		<c:otherwise>
+								<option value="${currency.id.codeKey}">
+									<c:out value="${currency.id.codeKey}" />&nbsp;<c:out value="${currency.codeValue}" />
+								</option>
+							</c:otherwise>
+						</c:choose>
+
+						</c:forEach>
+					</select>
+				</div>
+			</td>
+		</tr>
+	  </table>      
+      </td>
+    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+  </tr>
+  <tr>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" /></td>
+    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" /></td>
+  </tr>
+</table>
+
+
+  <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr class="pbtn">
+      <td>
+        <br />
+        <input type="button" name="reset" id="reset" value="重設" class="button-brown"/>
+        <input type="button" name="query" id="query" value="確認" class="button-brown"/>
+      </td>
+    </tr>
+  </table>
+</form:form>
+
+<c:if test="${showForm}">
+
+
+	<h1>標單查詢-<span class="title-l">查詢列表</span></h1>
+	
+	<table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	  <tr>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+	    <td>
+	    <div id="htmlBody">
+	    <table width="98%" border="0" align="center" cellpadding="2" cellspacing="0" id="table01">
+	      <tr class="cell-title">
+	      	<th nowrap="nowrap">票劵批號</th>
+	      	<th nowrap="nowrap">發行人</th>
+	      	<th nowrap="nowrap">發行日</th>
+	      	<th nowrap="nowrap">到期日</th>
+	      	<th nowrap="nowrap">幣別</th>
+	      	<th nowrap="nowrap">籌資總金額</th>
+			<th nowrap="nowrap">保證方式</th>
+			<th nowrap="nowrap">保證機構</th>
+			<th nowrap="nowrap">狀態</th>
+
+		  </tr>
+      <c:if test="${queryBatchList.totalElements > 0}">	     
+	      <c:forEach items="${queryBatchList.content }" var="item" varStatus="idx" >
+		      <tr class="<c:out value="${idx.index%2 eq 0 ? '' : 'td-lighty' }" />">
+		        <td align="center" nowrap="nowrap"><a href="#" onclick="showDetail('<c:out value="${item.batchNo}"/>')"><c:out value="${item.batchNo}"/></a></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.issuerId}"/>&nbsp;<c:out value="${item.issuerName}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.effectDate}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.expiredDate}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.currencyName}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.loanAmount}"/>&nbsp;<c:out value="${item.amountUnit}"/></td>
+		        <td align="center" nowrap="nowrap"><tags:codeMap type="GUARANTEE_TYPE" code="${item.guaranteeType}"/></td>
+		        <td align="center" nowrap="nowrap"><c:out value="${item.guarantorId}"/>&nbsp;<c:out value="${item.guarantorName}"/></td>
+		        <td align="center" nowrap="nowrap"><tags:codeMap type="CPDATA_STATUS" code="${item.status}"/></td>
+
+		      </tr>
+		  </c:forEach>
+       </c:if>
+		<c:if test="${queryBatchList.totalElements == 0}">
+				     <tr>
+					     <td colspan="17">
+					           <font size="3" color="red">查無資料!</font>
+					      </td>
+					 </tr>
+		</c:if>       		  
+	    </table>
+	    </div>
+	    </td>
+	    <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+	  </tr>
+	  <tr>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8" /></td>
+	    <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1" /></td>
+	    <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8" /></td>
+	  </tr>
+	</table>
+</c:if>
+
+			<!-- 分頁  -->
+			<c:if test="${queryBatchList.totalPages > 1}">
+				<table width="98%" border="0" align="center" cellpadding="0"
+					cellspacing="0" id="table-count">
+					<tr>
+						<tags:pagination page="${queryBatchList}" paginationSize="5" />
+					</tr>
+				</table>
+			</c:if>
+			<!-- 分頁結束 -->
+			
+</body>
+</html>

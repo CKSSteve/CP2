@@ -1,0 +1,179 @@
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@taglib prefix="tags" tagdir="/WEB-INF/tags"%>
+
+<html>
+<head>
+<c:if test="${message!=null && !empty message}">
+  <script type="text/javascript">
+  alert('<c:out value="${message}" />');
+  </script>
+  </c:if>
+  
+<script type="text/javascript" language="javascript">
+
+function back(){
+	$("#backForm").attr("action", '<c:url value="${method}"/>');
+	$("#backForm").submit();
+}
+
+function showPdfDoc(varBatchNo,varDocType){
+
+	$("#batchNo").val(varBatchNo);
+	$("#docType").val(varDocType);
+	$("#docForm").attr("action", '<c:url value="/batchQuery/showPdfDoc"/>');
+	$("#docForm").submit();
+	
+
+}
+
+
+
+
+</script>
+</head>
+
+<body id="scroller">
+<div id="htmlBody">
+<h1><span class="title-l">本票資料明細</span></h1>
+<form:form id="backForm" name="backForm" commandName="searchBean" method="POST">
+	<form:hidden path="issuerId"/>
+	<form:hidden path="effectDateStartDate"/>
+	<form:hidden path="effectDateEndDate"/>
+	<form:hidden path="expiredDateStartDate"/>
+	<form:hidden path="expiredDateEndDate"/>
+	<form:hidden path="currencyId"/>
+</form:form>
+
+<form id="docForm" name="docForm" method="POST" target="blank">
+	<input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+	<input type="hidden" id="batchNo" name="batchNo"> 
+	<input type="hidden" id="docType" name="docType"> 
+	
+</form>
+	
+ <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/top_left.gif"/>" width="8" height="8"></td>
+      <td style="background:url(<c:url value="/resources/images/table/top_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1"></td>
+      <td width="8"><img src="<c:url value="/resources/images/table/top_right.gif"/>" width="8" height="8"></td>
+    </tr>
+    <tr>
+      <td width="8" style="background:url(<c:url value="/resources/images/table/left_bg.gif"/>) repeat-y">&nbsp;</td>
+      <td><table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table_none">
+      </table>
+      <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0" id="table05">
+        <tr>
+          <th width="110">票劵批號</th>
+          <td><div align="left"><c:out value="${batchDetail.batchNo}" /></div></td>
+        </tr>
+        <tr>
+          <th width="110">發行編號</th>
+          <td><div align="left"><c:out value="${batchDetail.issueNo}" /></div></td>
+        </tr>        
+        <tr>
+          <th width="110">發行人</th>
+          <td><div align="left"><c:out value="${batchDetail.issuerId}"/>&nbsp;<c:out value="${batchDetail.issuerName}"/></div></td>
+        </tr> 
+        <tr>
+          <th width="110">票劵商名稱</th>
+          <td><div align="left"><c:out value="${batchDetail.brokerName}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">票劵商參加單位代號</th>
+          <td><div align="left"><c:out value="${batchDetail.brokerId}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">發票總金額</th>
+          <td><div align="left"><c:out value="${batchDetail.loanAmount}"/>&nbsp;<c:out value="${batchDetail.amountUnit}"/></div></td>
+        </tr>
+        <tr>
+          <th width="110">幣別</th>
+          <td><div align="left"><c:out value="${batchDetail.currencyName}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">類別</th>
+          <td><div align="left"><tags:codeMap type="CTBFLBQ2_LOAN_TYPE" code="${batchDetail.loanType.trim()}"/></div></td>
+        </tr> 
+        <tr>
+          <th width="110">到期日</th>
+          <td><div align="left"><c:out value="${batchDetail.expiredDate}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">發行日</th>
+          <td><div align="left"><c:out value="${batchDetail.effectDate}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">天期</th>
+          <td><div align="left"><c:out value="${batchDetail.days}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">保證方式</th>
+          <td><div align="left"><tags:codeMap type="GUARANTEE_TYPE" code="${batchDetail.guaranteeType}"/></div></td>
+        </tr> 
+        <tr>
+          <th width="110">委請書編號</th>
+          <td>
+          <c:choose>
+            <c:when test="${!empty batchDetail.entrustDoc}">
+				<div align="left"><a href="#"  onclick="showPdfDoc('<c:url value="${batchDetail.batchNo}"/>','entrustDoc')"><c:out value="${batchDetail.entrustDocId}"/></a></div>
+            </c:when>
+            <c:otherwise>
+				<div align="left"><c:out value="${batchDetail.entrustDocId}" /></div>
+			</c:otherwise>
+        </c:choose>         
+          </td>
+        </tr> 
+        <tr>
+          <th width="110">聲明書編號</th>
+          <td>
+            <c:choose>
+            <c:when test="${!empty batchDetail.statementDoc}">
+				<div align="left"><a href="#" onclick="showPdfDoc('<c:out value="${batchDetail.batchNo}"/>','statementDoc')"><c:out value="${batchDetail.statementDocId}"/></a></div>
+            </c:when>
+            <c:otherwise>
+				<div align="left"><c:out value="${batchDetail.statementDocId}" /></div>
+			</c:otherwise>
+        </c:choose>
+          
+          </td>
+        </tr> 
+        <tr>
+          <th width="110">保證人名稱</th>
+          <td><div align="left"><c:out value="${batchDetail.guarantorName}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">實際到期兌償日</th>
+          <td><div align="left"><c:out value="${batchDetail.payDate}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">兌償總金額</th>
+          <td><div align="left"><c:out value="${batchDetail.patAmount}" /></div></td>
+        </tr> 
+        <tr>
+          <th width="110">擔當付款人</th>
+          <td><div align="left"><c:out value="${batchDetail.payer}" /></div></td>
+        </tr>                                                                                                                                
+      </table>
+      </td>
+      <td width="8" style="background:url(<c:url value="/resources/images/table/right_bg.gif"/>) repeat-y">&nbsp;</td>
+    </tr>
+    <tr>
+      <td width="8"><img src="<c:url value="/resources/images/table/bottom_left.gif"/>" width="8" height="8"></td>
+      <td style="background:url(<c:url value="/resources/images/table/bottom_bg.gif"/>) repeat-x"><img src="<c:url value="/resources/images/spacer.gif"/>" width="1" height="1"></td>
+      <td width="8"><img src="<c:url value="/resources/images/table/bottom_right.gif"/>" width="8" height="8"></td>
+    </tr>
+  </table>
+ </div> 
+  <table width="98%" border="0" align="center" cellpadding="0" cellspacing="0">
+  	<tr class="pbtn">
+      <td>
+       	<br/>
+  		<input name="back" type="button" class="button-brown" onClick="back();" value="回上一頁">
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,49 @@
+body {
+	background: url(../images/loginBack.jpg) no-repeat;
+	background-size:100%;
+	padding-top:30px;
+}
+form{
+	margin:0 58px 14px 0;
+}
+form p{
+	margin:0px;
+}
+.inputtxt{
+	font-family: Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+	font-size:10pt;
+	border:1px solid #555555;
+	color:#333333;
+	padding:2px 2px 0px 2px;
+}
+.login{
+	background: url(../images/index_photo_02.jpg) no-repeat;
+	width:597px;
+	text-align:left;
+	padding:0px;
+}
+.copyright{
+	font-family: sans-serif, 細明體, 新細明體;
+	font-size:0.8em;
+	color:#FFFFFF;
+}
+.copyrightBlack{
+	font-family: sans-serif, 細明體, 新細明體;
+	font-size:0.8em;
+	color:#000000;
+}
+#logintable{
+	font-family: 標楷體,sans-serif, 細明體, 新細明體;
+	font-size:20px;
+	color:#333333;
+	margin:5px 0px 0px 0;
+}
+.loginbtn{
+	height:20px;
+	padding:2px 3px 0px 3px;
+	border:1px solid #000000;
+	background-color:#FBAF5C;
+	font-size:11px;
+	color:#000000;
+	font-family:Geneva,Arial,Helvetica,"新細明體","細明體",sans-serif;
+}

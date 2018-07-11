@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       					   http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+
+<!-- 	<bean id="dozerBeanMapper" class="org.dozer.spring.DozerBeanMapperFactoryBean"> -->
+<!-- 		<property name="mappingFiles" value="classpath*:config/dozer/*mapping.xml"/> -->
+<!-- 	</bean> -->
+	
+<!--     SET default mail properties -->
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="mail.uxb2b.com"/>
+        <property name="port" value="25"/>
+<!--         <property name="username" value=""/> -->
+<!--         <property name="password" value=""/> -->
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.transport.protocol">smtp</prop>
+<!--                 <prop key="mail.smtp.starttls.enable">true</prop> -->
+                <prop key="mail.smtp.auth">false</prop>
+                <prop key="mail.debug">false</prop>
+            </props>
+        </property>
+    </bean>	
+    
+    <bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
+        <property name="from" value="cp2_service@uxb2b.com"></property>
+    </bean>
+    
+    <bean id="orderManager" class="com.uxb2b.ecp.service.MailService">
+        <property name="mailSender" ref="mailSender"/>
+        <property name="templateMessage" ref="templateMessage"/>
+    </bean> 
+		
+	<bean id="systemInfo" class="com.uxb2b.ecp.service.SystemInfo">
+		<property name="approve">
+			<map>
+				<!-- 簽核流程維護步驟 -->
+				<entry key="maxlevel" value="3"/>
+			</map>			
+		</property>
+		
+		<property name="staticParameter" >
+			<map>
+				<!-- bankCode -->
+				<entry key="bankCode" value="999"/>
+				<!-- bankName -->
+				<entry key="bankName" value="網優分行"/>
+				<!-- CertServer Sign URL -->
+				<entry key="cert.sign.url" value="http://172.16.2.10:2419/pkcs/sign"/>
+				<!-- 是否顯示登入錯誤原因  true:顯示-->
+				<entry key="show.login.error.message" value="true"/>
+				<!--交割服務費率-->
+				<entry key="delivery.eate" value="0.038"/>
+			</map>			
+		</property>	
+		
+		 <property name="sendMailInfo">
+			<map>		    
+<!-- 			    Mail發送主旨 -->
+				<entry key="TENDER_RETURN_Subject" value="票券商端管理系統-報價審核退回通知"/>
+				<entry key="RATE_DETAIL_RETURN_Subject" value="票券商端管理系統-本票帳務明細審核退回通知 "/>
+				<entry key="AWARD_DATA_RETURN_Subject" value="票券商端管理系統-票券批號(得標確認)審核退回"/>
+			</map>			
+		</property>		
+		
+	</bean>
+</beans>

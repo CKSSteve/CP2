@@ -1,0 +1,95 @@
+package com.uxb2b.ecp.persist;
+
+import java.sql.Timestamp;
+import java.util.List;
+import org.springframework.data.domain.Page;
+import com.uxb2b.ecp.model.User;
+
+/**
+ * USER TABLE
+ * @author steve
+ *
+ */
+public interface IUserRepositoryPersist {
+
+	/**
+	 * 登入成功更新USER TABLE
+	 * 
+	 * @param userId 帳號
+	 * @param loginCount 登入次數
+	 * @param lastLoginTime 最後登入時間
+	 */
+	public void updateLoginSuccess(String userId , int loginCount , Timestamp lastLoginTime);
+	
+	/**
+	 * 登入失敗更新USER TABLE
+	 * 
+	 * @param userId 帳號
+	 * @param errorCount 登入失敗次數
+	 * @param lastErrorTime 上次登入失敗時間
+	 */
+	public void updateLoginError(String userId ,int errorCount ,Timestamp lastErrorTime);
+	
+	/**
+	 * 用USER_ID與PASSWORD查詢USER TABLE
+	 * 
+	 * @param userId 帳號
+	 * @param pwd 密碼
+	 * @return USER
+	 */
+	public User findByUserIdAndpassword(String userId,String pwd);
+	
+	/**
+	 * 用USER_ID查詢USER TABLE
+	 * 
+	 * @param userId
+	 * @return
+	 */
+	public User findByUserId(String userId);
+	
+	/**
+	 * UPDATE PASSWORD&CHANGE_PASSWORD_TIME
+	 * 
+	 * @param userId 帳號
+	 * @param pwd 密碼
+	 * @param changePasswordTime 變更密碼時間
+	 */
+	public void changePwd(String userId,String pwd,Timestamp changePasswordTime);
+	
+	/**
+	 *  SAVE USER
+	 * 
+	 * @param user
+	 */
+	public void personalUserSave(User user);
+	
+	/**
+	 * 查詢出所有USER TABLE的資料
+	 * 
+	 * @return
+	 */
+	public List<User> getAllUser();
+	
+	/**
+	 * 查詢出所有USER TABLE的資料
+	 * 
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
+	public Page<User> getAllUserPage(int pageNumber,int pageSize);
+	
+	
+	/**
+	 * 查詢USER TABLE 
+	 * 條件:BRANCH_ID
+	 * 
+	 * @param branchId 銀行分行金資代碼
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
+	public Page<User> getUserByBranchId(String branchId, int pageNumber,int pageSize);
+	
+	public List<User> getUserByRoleId(int roleId,String branchId);
+}

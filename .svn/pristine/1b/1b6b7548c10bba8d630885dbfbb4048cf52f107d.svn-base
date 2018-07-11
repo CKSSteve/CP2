@@ -1,0 +1,89 @@
+package com.uxb2b.ecp.business;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import com.uxb2b.ecp.bean.UserProfileBean;
+import com.uxb2b.ecp.model.AwardData;
+import com.uxb2b.ecp.model.RejectReason;
+import com.uxb2b.ecp.model.SysCode;
+
+/**
+ * 本票利率明細登錄
+ * @author steve
+ *
+ */
+public interface IRateDetailsBusiness {
+
+	/**
+	 * 取得待本票利率明細登錄清單
+	 * @param branchId 分行代號
+	 * @param roleId 角色代碼
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
+	public Page<AwardData> getRateDetailsRegisterInventory(String branchId, int roleId,int pageNumber,int pageSize);
+	
+	/**
+	 * 取得本票利率明細
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @return
+	 */
+	public AwardData getRateDetails(String quationNo,int itemNo);
+	
+	/**
+	 * 本票利率明細登錄
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @param deliveryRate 交割服務費率
+	 * @param underwritingRate 承銷手續費率
+	 * @param visaRate 簽證費率
+	 * @param guaranteeRate 保證費率
+	 * @param userDetails 使用者資訊
+	 * @throws Exception
+	 */
+	public void doRegister(String quationNo, String itemNo, String deliveryRate, String underwritingRate,String visaRate,String guaranteeRate,UserProfileBean userDetails)throws Exception;
+	
+	/**
+	 * 取得待本票利率明細審核清單
+	 * @param branchId 分行代號
+	 * @param roleId 角色代碼
+	 * @param pageNumber
+	 * @param pageSize
+	 * @return
+	 */
+	public Page<AwardData> getRateDetailsReviewInventory(String branchId, int roleId,int pageNumber,int pageSize);
+	
+	/**
+	 * 查詢SYSCODE TABLE
+	 * @param codeType 代碼類別
+	 * @return
+	 */
+	public List<SysCode> findSysCodeByCodeType(String codeType);
+	
+	/**
+	 * 查詢本票利率明細退回原因
+	 * @return
+	 */
+	public List<RejectReason> findRateDetailsRejectReason();
+	
+	/**
+	 * 退回本票利率明細登錄
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @param reasonForReturnString 退回原因
+	 * @param userDetails 使用者資訊
+	 */
+	public void doReturn(String quationNo,String itemNo,String reasonForReturnString,UserProfileBean userDetails);
+	
+	/**
+	 * 本票利率明細審核
+	 * @param quationNo 報價單號碼
+	 * @param itemNo 項次序號
+	 * @param userDetails 使用者資訊
+	 * @throws Exception
+	 */
+	public void doReview(String quationNo,String itemNo,UserProfileBean userDetails)throws Exception;
+}
